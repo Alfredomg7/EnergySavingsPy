@@ -1,8 +1,9 @@
 import sqlite3
 from database.dao_interface import SolarHoursDAO
+import config
 
 class SolarHoursData(SolarHoursDAO):
-    def __init__(self, db_path='SolarData.db'):
+    def __init__(self, db_path=config.DATABASE_PATH):
         self.db_path = db_path
 
     def get_solar_hours(self, location_name, tilt):
@@ -25,4 +26,3 @@ class SolarHoursData(SolarHoursDAO):
             import traceback
             traceback.print_exc()
             return None
-

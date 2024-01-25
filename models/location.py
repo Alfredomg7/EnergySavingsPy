@@ -1,4 +1,4 @@
-from database import SolarHoursData
+from database.solar_hours_data import SolarHoursData
 
 class Location:
     def __init__(self, name, solar_hours_data=None):

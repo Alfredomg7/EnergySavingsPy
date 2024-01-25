@@ -2,11 +2,13 @@ import os
 import unittest
 from database.solar_hours_data import SolarHoursData
 from models.location import Location
+import config
 
 class TestSolarHours(unittest.TestCase):
     def setUp(self):
-        db_path = os.path.join(os.path.dirname(__file__), '..', 'database', 'SolarData.db')
-        self.solar_hours_data = SolarHoursData(db_path=db_path)
+        db_path = config.DATABASE_PATH
+        print(f"Using database path: {db_path}")
+        self.solar_hours_data = SolarHoursData(db_path)
 
         self.test_data = {
             'Mexicali': [17, 32, 47],
