@@ -1,4 +1,3 @@
-import os
 import unittest
 from database.solar_hours_data import SolarHoursData
 from models.location import Location

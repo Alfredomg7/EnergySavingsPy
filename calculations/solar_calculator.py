@@ -24,7 +24,7 @@ class SolarSavingsCalculator:
                     new_monthly_consumption.append(0)
                 else:
                     # Bank cannot cover the entire deficit
-                    new_monthly_consumption.append(abs(deficit_after_bank))
+                    new_monthly_consumption.append(round(abs(deficit_after_bank),2))
                     energy_bank = 0
 
         # Loop again if there is remaining energy in the bank
