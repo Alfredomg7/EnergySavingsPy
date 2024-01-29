@@ -21,7 +21,8 @@ class TestSolarHours(unittest.TestCase):
             for tilt in tilts:
                 solar_hours = location.get_solar_hours(tilt)
                 self.assertIsNotNone(solar_hours, f"Data should exist for {city} with tilt {tilt}°")
-        
+                self.assertEqual(len(solar_hours), 12, f"Solar hours list for {city} with tilt {tilt}° should have 12 months data")
+    
     def test_invalid_inputs(self):
         non_existing_location = Location("Borderland", self.solar_hours_data)
         self.assertIsNone(non_existing_location.get_solar_hours(15))

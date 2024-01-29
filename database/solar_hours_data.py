@@ -11,7 +11,7 @@ class SolarHoursData(SolarHoursDAO):
             with sqlite3.connect((self.db_path)) as conn:
                 cursor = conn.cursor()
                 query = """
-                SELECT month, solar_hours
+                SELECT solar_hours
                 FROM solar_hours
                 JOIN locations ON solar_hours.location_id = locations.location_id
                 WHERE location_name = ?
@@ -20,7 +20,7 @@ class SolarHoursData(SolarHoursDAO):
                 """
                 cursor.execute(query, (location_name, tilt))
                 result = cursor.fetchall()
-                return {row[0]: row[1] for row in result} if result else None
+                return [row[0] for row in result] if result else None
         except sqlite3.Error as e:
             print(f"Database error: {e}")
             import traceback
