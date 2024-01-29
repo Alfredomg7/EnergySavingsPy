@@ -20,9 +20,12 @@ class PVSystem:
     def calculate_energy_production(self):
         monthly_production = []
         solar_hours = self.location.get_solar_hours(self.pv_module.tilt_angle)
+        days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        
         if solar_hours:
-            for hours in solar_hours:
-                monthly_energy = self.system_size * hours * self.pv_module.efficiency * self.efficiency
+            for month, hours in enumerate(solar_hours):
+                days = days_in_month[month]
+                monthly_energy = round(self.system_size * hours * days * self.pv_module.efficiency * self.efficiency, 2)
                 monthly_production.append(monthly_energy)
         return monthly_production 
     
