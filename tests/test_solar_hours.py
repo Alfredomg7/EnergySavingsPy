@@ -6,7 +6,6 @@ import config
 class TestSolarHours(unittest.TestCase):
     def setUp(self):
         db_path = config.DATABASE_PATH
-        print(f"Using database path: {db_path}")
         self.solar_hours_data = SolarHoursData(db_path)
 
         self.test_data = {
