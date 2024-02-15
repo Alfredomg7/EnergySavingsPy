@@ -68,5 +68,12 @@ def setup_database(db_path=config.DATABASE_PATH, locations_csv='data/locations.c
     except Exception as e:
         print(f"An error occurred during setup: {e}")
 
+def initialize_database():
+    db_path = 'data/SolarData.db'
+    locations_csv = 'data/locations.csv'
+    solar_hours_csv = 'data/solar_hours.csv'
+
+    setup_database(db_path, locations_csv, solar_hours_csv)
+
 if __name__ == '__main__':
-    setup_database()
+    initialize_database()
