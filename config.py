@@ -1,1 +1,1 @@
-DATABASE_PATH = 'data/SolarData.db'
+DATABASE_PATH = 'data/SolarData.sqlite3'
