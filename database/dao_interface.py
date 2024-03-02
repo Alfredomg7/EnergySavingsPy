@@ -9,3 +9,8 @@ class PdbtRateDAO(ABC):
     @abstractmethod
     def get_charges(self, state):
         pass
+
+class LocationDAO(ABC):
+    @abstractmethod
+    def get_state(self):
+        pass
