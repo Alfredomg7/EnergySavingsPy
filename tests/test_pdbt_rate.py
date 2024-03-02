@@ -1,5 +1,5 @@
 import unittest
-from database.rate_data import PdbtRateData
+from database.pdbt_rate_data import PdbtRateData
 import config
 
 class TestPdbtRateData(unittest.TestCase):
