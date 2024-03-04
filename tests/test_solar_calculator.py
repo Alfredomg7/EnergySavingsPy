@@ -9,9 +9,8 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         self.mock_location = Mock()
         self.mock_location.get_solar_hours.return_value = [5, 5.5, 6, 6.5, 7, 7.5, 7, 6.5, 6, 5.5, 5, 4.5]
         self.pv_system = PVSystem(self.mock_pv_module, pv_module_count=10, efficiency=1, location=self.mock_location)
-        self.rate = 0.12
         self.sample_consumption_data = [177, 181, 248, 354, 548, 1185, 1280, 1280, 478, 227, 204, 365]
-        self.calculator = SolarSavingsCalculator(self.rate, self.sample_consumption_data)
+        self.calculator = SolarSavingsCalculator(self.sample_consumption_data)
 
     def test_new_monthly_consumption(self):
         expected_new_monthly_consumption = [0, 0, 0, 0, 0, 0, 427.40, 796.40, 46.00, 0, 0, 0]
