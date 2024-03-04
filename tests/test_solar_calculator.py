@@ -1,18 +1,22 @@
 import unittest
 from unittest.mock import Mock
-from models.pv_system import PVModule, PVSystem
 from calculations.solar_calculator import SolarSavingsCalculator
 
 class TestSolarSavingsCalculator(unittest.TestCase):
     def setUp(self):
-        self.mock_pv_module = PVModule(capacity=0.3, tilt_angle=31, efficiency=0.8, lifespan=25, annual_degradation=0.005)
-        self.mock_location = Mock()
-        self.mock_location.get_solar_hours.return_value = [5, 5.5, 6, 6.5, 7, 7.5, 7, 6.5, 6, 5.5, 5, 4.5]
-        self.pv_system = PVSystem(self.mock_pv_module, pv_module_count=10, efficiency=1, location=self.mock_location)
-        self.sample_consumption_data = [177, 181, 248, 354, 548, 1185, 1280, 1280, 478, 227, 204, 365]
-        self.calculator = SolarSavingsCalculator(self.sample_consumption_data)
+        self.mock_rate = Mock()
+        self.sample_consumption_data = [120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230]
+        self.mock_rate.calculate_monthly_payments.return_value = [100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210]
+        self.calculator = SolarSavingsCalculator(self.mock_rate, self.sample_consumption_data)
 
-    def test_new_monthly_consumption(self):
-        expected_new_monthly_consumption = [0, 0, 0, 0, 0, 0, 427.40, 796.40, 46.00, 0, 0, 0]
-        actual_new_monthly_consumption = self.calculator.calculate_new_monthly_consumption(self.pv_system)
-        self.assertEqual(expected_new_monthly_consumption, actual_new_monthly_consumption, f"Expected {expected_new_monthly_consumption}, got {actual_new_monthly_consumption}")
+    def test_calculate_new_monthly_payment(self):
+        mock_pv_system = Mock()
+        mock_pv_system.calculate_energy_production.return_value = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
+        expected_new_monthly_consumption = [20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130]
+        new_monthly_payment = self.calculator.calculate_new_monthly_payment(mock_pv_system)
+        self.mock_rate.calculate_monthly_payments.assert_called_with(expected_new_monthly_consumption)
+        expected_new_monthly_payment = [100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210]
+        self.assertEqual(new_monthly_payment, expected_new_monthly_payment)
+
+if __name__ == '__main__':
+    unittest.main()
