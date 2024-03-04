@@ -25,7 +25,7 @@ class TestPdbtRate(unittest.TestCase):
                     consumption * 0.1, consumption * 0.05, consumption * 0.01, 
                     100, consumption * 0.02, consumption * 0.07, consumption * 0.03
                 ]) * 1.08
-                self.assertEqual(monthly_payments[i], expected_payment)
+                self.assertEqual(monthly_payments[i], round(expected_payment,2))
 
 if __name__ == "__main__":
     unittest.main()

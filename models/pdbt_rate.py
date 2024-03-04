@@ -15,19 +15,18 @@ class PdbtRate:
         if len(monthly_consumption) != 12:
             raise ValueError("Monthly consumptions list must contain 12 items, one for each month.")
 
-        monthly_payments = []
-        for rate, consumption in zip(self.rates, monthly_consumption):
-            monthly_cost = sum([
-                consumption * rate['transmission'],
-                consumption * rate['distribution'],
-                consumption * rate['cenace'],
-                rate['supplier'],
-                consumption * rate['services'],
-                consumption * rate ['energy'],
-                consumption * rate ['capacity']
-            ])
-
-            monthly_cost *= self.IVA_RATE
-            monthly_payments.append(monthly_cost)
+        return [self._calculate_payment(rate, consumption) for rate, consumption in zip(self.rates, monthly_consumption)]
         
-        return monthly_payments
+    def _calculate_payment(self, rate, consumption):
+        cost_components = [
+            consumption * rate["transmission"],
+            consumption * rate["distribution"],
+            consumption * rate["cenace"],
+            rate["supplier"],
+
+            consumption * rate["services"],
+            consumption * rate["energy"],
+            consumption * rate["capacity"],
+        ]
+        total_cost = sum(cost_components) * self.IVA_RATE
+        return round(total_cost, 2)
