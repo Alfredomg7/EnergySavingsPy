@@ -1,6 +1,9 @@
 from models.pv_module import PVModule
 from models.location import Location
 
+from models.pv_module import PVModule
+from models.location import Location
+
 class PVSystem:
     def __init__(self, pv_module, pv_module_count, efficiency, location):
         self._pv_module = self.validate_pv_module(pv_module)
