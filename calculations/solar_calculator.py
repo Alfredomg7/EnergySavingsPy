@@ -5,7 +5,7 @@ class SolarSavingsCalculator:
         self.current_payment = rate.calculate_monthly_payments(current_monthly_consumption)
 
     def calculate_new_monthly_consumption(self, pv_system):
-        monthly_production = pv_system.calculate_energy_production()
+        monthly_production = pv_system.calculate_annual_energy_production()
         new_monthly_consumption = []
         energy_bank = 0
 
