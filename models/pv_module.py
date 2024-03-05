@@ -4,7 +4,7 @@ class PVModule:
         self._tilt_angle = self.validate_tilt_angle(tilt_angle)
         self._efficiency = self.validate_efficiency(efficiency)
         self._lifespan = self.validate_lifespan(lifespan)
-        self._annual_degration = self.validate_annual_degradation(annual_degradation)
+        self._annual_degradation = self.validate_annual_degradation(annual_degradation)
 
     def validate_capacity(self, value):
         if not 0.01 <= value <= 1:
@@ -29,6 +29,7 @@ class PVModule:
     def validate_annual_degradation(self, value):
         if not 0 <= value <= 0.1:
             raise ValueError("Annual degradation must be between 0 and 0.1")
+        return value
             
     @property
     def capacity(self):
@@ -64,7 +65,7 @@ class PVModule:
     
     @property
     def annual_degradation(self):
-        return self._annual_degration
+        return self._annual_degradation
     
     @annual_degradation.setter
     def annual_degradation(self, value):

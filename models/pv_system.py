@@ -1,9 +1,6 @@
 from models.pv_module import PVModule
 from models.location import Location
 
-from models.pv_module import PVModule
-from models.location import Location
-
 class PVSystem:
     def __init__(self, pv_module, pv_module_count, efficiency, location):
         self._pv_module = self.validate_pv_module(pv_module)
@@ -33,7 +30,7 @@ class PVSystem:
         return value
     
     def calculate_system_size(self):
-        return self.pv_module._capacity * self._pv_module_count
+        return self._pv_module.capacity * self._pv_module_count
 
     @property
     def pv_module(self):
@@ -75,7 +72,7 @@ class PVSystem:
     
     def calculate_annual_energy_production(self):
         annual_production = []
-        solar_hours = self._location.get_solar_hours(self.pv_module.tilt_angle)
+        solar_hours = self._location.get_solar_hours(self._pv_module.tilt_angle)
         days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
         
         if solar_hours:
@@ -85,6 +82,10 @@ class PVSystem:
                 annual_production.append(monthly_production)
         return annual_production 
     
-    
+    def calculate_lifetime_production(self):
+        annual_production = sum(self.calculate_annual_energy_production())
+        degradation_factor = 1 - self._pv_module.annual_degradation
+        lifetime_production = [round((annual_production * (degradation_factor ** year)), 2) for year in range(self._pv_module.lifespan)]
+        return lifetime_production
 
     
