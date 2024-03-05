@@ -1,11 +1,3 @@
-class PVModule:
-    def __init__(self, capacity, tilt_angle, efficiency, lifespan=25, annual_degradation=0.005):
-        self.capacity = capacity
-        self.tilt_angle = tilt_angle
-        self.efficiency = efficiency
-        self.lifespan = lifespan
-        self.annual_degration = annual_degradation
-
 class PVSystem:
     def __init__(self, pv_module, pv_module_count, efficiency, location):
         self.pv_module = pv_module

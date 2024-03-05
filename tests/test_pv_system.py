@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import Mock
-from models.pv_system import PVModule, PVSystem
+from models.pv_module import PVModule
+from models.pv_system import PVSystem
 
 class TestPVSystem(unittest.TestCase):
     def setUp(self):
