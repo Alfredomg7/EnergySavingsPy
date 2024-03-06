@@ -3,33 +3,33 @@ from models.location import Location
 
 class PVSystem:
     def __init__(self, pv_module, pv_module_count, efficiency, location):
-        self._pv_module = self.validate_pv_module(pv_module)
-        self._pv_module_count = self.validate_pv_module_count(pv_module_count)
-        self._efficiency = self.validate_efficiency(efficiency)
-        self._location = self.validate_location(location)
-        self._system_size = self.calculate_system_size()
+        self._pv_module = self._validate_pv_module(pv_module)
+        self._pv_module_count = self._validate_pv_module_count(pv_module_count)
+        self._efficiency = self._validate_efficiency(efficiency)
+        self._location = self._validate_location(location)
+        self._system_size = self._calculate_system_size()
     
-    def validate_pv_module(self, value):
+    def _validate_pv_module(self, value):
         if not isinstance(value, PVModule):
             raise ValueError("pv_module must be an instance of PVModule")
         return value
     
-    def validate_pv_module_count(self, value):
+    def _validate_pv_module_count(self, value):
         if not (isinstance(value, int) and value > 0):
             raise ValueError("pv module count must be an integer greater than 0")
         return value
     
-    def validate_efficiency(self, value):
+    def _validate_efficiency(self, value):
         if not 0.1 <= value <= 1:
             raise ValueError("Efficiency must be between 0.1 and 1")
         return value
 
-    def validate_location(self, value):
+    def _validate_location(self, value):
         if not isinstance(value, Location):
             raise ValueError("location must be an instance of Location")
         return value
     
-    def calculate_system_size(self):
+    def _calculate_system_size(self):
         return self._pv_module.capacity * self._pv_module_count
 
     @property
@@ -38,8 +38,8 @@ class PVSystem:
     
     @pv_module.setter
     def pv_module(self, value):
-        self._pv_module = self.validate_pv_module(value)
-        self._system_size = self.calculate_system_size()
+        self._pv_module = self._validate_pv_module(value)
+        self._system_size = self._calculate_system_size()
 
     @property
     def pv_module_count(self):
@@ -47,8 +47,8 @@ class PVSystem:
     
     @pv_module_count.setter
     def pv_module_count(self, value):
-        self._pv_module_count = self.validate_pv_module_count(value)
-        self._system_size = self.calculate_system_size()
+        self._pv_module_count = self._validate_pv_module_count(value)
+        self._system_size = self._calculate_system_size()
     
     @property
     def efficiency(self):
@@ -56,7 +56,7 @@ class PVSystem:
     
     @efficiency.setter
     def efficiency(self, value):
-        self._efficiency = self.validate_efficiency(value)
+        self._efficiency = self._validate_efficiency(value)
 
     @property
     def location(self):
@@ -64,7 +64,7 @@ class PVSystem:
     
     @location.setter
     def location(self, value):
-        self._location = self.validate_location(value)
+        self._location = self._validate_location(value)
     
     @property
     def system_size(self):

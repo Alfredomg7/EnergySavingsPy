@@ -35,7 +35,7 @@ class TestPVSystem(unittest.TestCase):
     def test_system_size(self):
         pv_system = PVSystem(pv_module=self.pv_module, pv_module_count=10, efficiency=1, location=self.mock_location)
         expected_size = 3
-        actual_size = pv_system.calculate_system_size()
+        actual_size = pv_system.system_size
         self.assertEqual(actual_size, expected_size, msg=f"Expected {expected_size} kW, got {actual_size} kW")
 
     def test_energy_production(self):
