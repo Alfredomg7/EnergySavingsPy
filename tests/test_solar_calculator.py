@@ -1,15 +1,26 @@
 import unittest
 from unittest.mock import Mock
 from models.pv_system import PVSystem
+from models.rate import Rate
 from calculations.solar_calculator import SolarSavingsCalculator
 
 class TestSolarSavingsCalculator(unittest.TestCase):
     def setUp(self):
-        self.mock_rate = Mock()
+        self.mock_rate = Mock(spec=Rate)
         self.sample_consumption_data = [120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230]
         self.mock_rate.calculate_monthly_payments.return_value = [100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210]
         self.calculator = SolarSavingsCalculator(self.mock_rate, self.sample_consumption_data)
 
+    def test_rate_validation(self):
+        invalid_rate = Mock()
+        with self.assertRaises(ValueError):
+            SolarSavingsCalculator(invalid_rate, self.sample_consumption_data)
+    
+    def test_pv_system_validation(self):
+        invalid_system_size = Mock()
+        with self.assertRaises(ValueError):
+            self.calculator.calculate_new_monthly_payment(invalid_system_size)
+            
     def test_calculate_new_monthly_payment(self):
         mock_pv_system = Mock(spec=PVSystem)
         mock_pv_system.calculate_annual_energy_production.return_value = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]

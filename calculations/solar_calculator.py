@@ -1,26 +1,15 @@
 from models.pv_system import PVSystem
+from models.rate import Rate
 
 class SolarSavingsCalculator:
     def __init__(self, rate, current_monthly_consumption):
         self._rate = self._validate_rate(rate)
-        self._current_monthly_consumption = self._validate_current_monthly_consumption(current_monthly_consumption)
+        self._current_monthly_consumption = current_monthly_consumption
         self._current_payment = rate.calculate_monthly_payments(current_monthly_consumption)
 
     def _validate_rate(self, value):
-        if not callable(getattr(value, 'calculate_monthly_payments')):
-            raise ValueError("The rate object must have a 'calculate_monthly_payments' method.")
-        return value
-    
-    def _validate_current_monthly_consumption(self, value):
-        if not isinstance(value, list):
-            raise ValueError("current_monthly_consumption must be a list")
-        
-        if len(value) != 12:
-            raise ValueError("current_monthly_consumption list must contain 12 items")
-        
-        if not all(isinstance(item, int) for item in value):
-            raise ValueError("All items in current_monthly_consumption must be integers")
-        
+        if not isinstance(value, Rate):
+            raise ValueError("The rate object must have an instance of Rate or its subclass")
         return value
     
     def _validate_pv_system(self, value):
@@ -43,7 +32,7 @@ class SolarSavingsCalculator:
     
     @current_monthly_consumption.setter
     def current_monthly_consumption(self, value):
-        self._current_monthly_consumption = self._validate_current_monthly_consumption(value)
+        self._current_monthly_consumption = value
         self._current_payment = self._rate.calculate_monthly_payments(self._current_monthly_consumption)
 
     @property
