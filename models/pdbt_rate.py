@@ -1,22 +1,13 @@
 from database.pdbt_rate_data import PdbtRateData 
 from utils.date_utils import calculate_start_month
+from models.rate import Rate
 
-class PdbtRate:
-    IVA_RATE = 1.08
-
+class PdbtRate(Rate):
     def __init__(self, state, end_month, pdbt_rate_data=None):
+        super().__init__(state, end_month)
         self._pdbt_rate_data = pdbt_rate_data or PdbtRateData()
-        self._charges = self._pdbt_rate_data.get_charges(state, calculate_start_month(end_month), end_month)
+        self._charges = self._pdbt_rate_data.get_charges(self._state, calculate_start_month(self._end_month), self._end_month)
     
-    def calculate_monthly_payments(self, monthly_consumption):
-        if not self._charges or len(self._charges) != 12:
-            raise ValueError("Rates data is incomplete or not available. Please fetch correct rates before calculating payments.")
-        
-        if len(monthly_consumption) != 12:
-            raise ValueError("Monthly consumptions list must contain 12 items, one for each month.")
-
-        return [self._calculate_payment(rate, consumption) for rate, consumption in zip(self._charges, monthly_consumption)]
-        
     def _calculate_payment(self, charge, consumption):
         cost_components = [
             consumption * charge["transmission"],
