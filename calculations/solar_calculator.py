@@ -74,6 +74,22 @@ class SolarSavingsCalculator:
 
         return new_monthly_consumption
     
+    def calculate_new_lifetime_consumption(self, pv_system):
+        pv_system = self._validate_pv_system(pv_system)
+        lifetime_production = pv_system.calculate_lifetime_production()
+        annual_consumption = sum(self._current_monthly_consumption)
+        new_lifetime_consumption = []
+
+        if annual_consumption > lifetime_production[0]:
+            for production in lifetime_production:
+                new_lifetime_consumption = [annual_consumption - production for production in lifetime_production]
+        else:
+            for production in lifetime_production:
+                new_consumption = annual_consumption - production 
+                new_lifetime_consumption.append(max(new_consumption, 0))
+
+        return new_lifetime_consumption
+
     def calculate_new_monthly_payment(self, pv_system):
         pv_system = self._validate_pv_system(pv_system)
         return self.rate.calculate_monthly_payments(self.calculate_new_monthly_consumption(pv_system))

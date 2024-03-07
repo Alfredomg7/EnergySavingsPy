@@ -30,5 +30,20 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         expected_new_monthly_payment = [100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210]
         self.assertEqual(new_monthly_payment, expected_new_monthly_payment)
 
+    def test_calculate_new_lifetime_consumption(self):
+        mock_pv_system = Mock(spec=PVSystem)
+        lifetime_production_deficit = [2000, 1950, 1900, 1850, 1800, 1750, 1700, 1650, 1500, 1450]
+        lifetime_production_surplus = [2300, 2250, 2200, 2150, 2100, 2050, 2000, 1950, 1900, 1850]
+
+        mock_pv_system.calculate_lifetime_production.return_value = lifetime_production_deficit
+        expected_consumption_deficit = [sum(self.sample_consumption_data) - production for production in lifetime_production_deficit]
+        actual_consumption_deficit = self.calculator.calculate_new_lifetime_consumption(mock_pv_system)
+        self.assertEqual(actual_consumption_deficit, expected_consumption_deficit)
+
+        mock_pv_system.calculate_lifetime_production.return_value = lifetime_production_surplus
+        expected_consumption_surplus = [max(sum(self.sample_consumption_data) - production, 0) for production in lifetime_production_surplus]
+        actual_consumption_surplus = self.calculator.calculate_new_lifetime_consumption(mock_pv_system)
+        self.assertEqual(actual_consumption_surplus, expected_consumption_surplus)
+
 if __name__ == '__main__':
     unittest.main()
