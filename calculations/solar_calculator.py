@@ -39,6 +39,12 @@ class SolarSavingsCalculator:
     def current_payment(self):
         return self._current_payment
     
+    def calculate_offset(self, pv_system, validate=True):
+        if validate:
+            pv_system = self._validate_pv_system(pv_system) 
+        offset = sum(pv_system.calculate_annual_energy_production()) / sum(self._current_monthly_consumption)
+        return offset
+    
     def calculate_new_monthly_consumption(self, pv_system):
         pv_system = self._validate_pv_system(pv_system)
         monthly_production = pv_system.calculate_annual_energy_production()
@@ -78,9 +84,9 @@ class SolarSavingsCalculator:
         pv_system = self._validate_pv_system(pv_system)
         lifetime_production = pv_system.calculate_lifetime_production()
         annual_consumption = sum(self._current_monthly_consumption)
+        offset = self.calculate_offset(pv_system, validate=False)
         new_lifetime_consumption = []
-
-        if annual_consumption > lifetime_production[0]:
+        if offset < 1:
             for production in lifetime_production:
                 new_lifetime_consumption = [annual_consumption - production for production in lifetime_production]
         else:
