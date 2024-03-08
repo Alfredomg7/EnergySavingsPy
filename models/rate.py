@@ -21,14 +21,15 @@ class Rate:
             raise ValueError("Each item in charges data must be a dictionary.")
         
     def _validate_monthly_consumption(self, value):
+
         if not isinstance(value, list):
             raise ValueError("monthly_consumption must be a list")
         
         if len(value) != 12:
             raise ValueError("monthly_consumption list must contain 12 items")
         
-        if not all(isinstance(item, int) for item in value):
-            raise ValueError("All items in monthly_consumption must be integers")
+        if not all(item >= 0 for item in value):
+            raise ValueError("All items in monthly_consumption must be positive numbers")
         
         return value
     
