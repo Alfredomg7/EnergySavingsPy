@@ -5,6 +5,7 @@ class Rate:
         self._state = state
         self._end_month = end_month
         self._charges = None
+        self._fix_charge = None
 
     def _validate_charges(self):
         if not self._charges:
@@ -30,6 +31,10 @@ class Rate:
             raise ValueError("All items in monthly_consumption must be integers")
         
         return value
+    
+    @property
+    def fix_charge(self):
+        return self._fix_charge
         
     def calculate_monthly_payments(self, monthly_consumption):
         self._validate_charges()

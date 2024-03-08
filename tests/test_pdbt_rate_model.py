@@ -10,6 +10,12 @@ class TestPdbtRate(unittest.TestCase):
         self.mock_charges = [{'transmission': 0.1, 'distribution': 0.05, 'cenace': 0.01,
                             'supplier': 100, 'services': 0.02, 'energy': 0.07, 'capacity': 0.03} for _ in range(12)]
 
+    def test_fix_charge(self):
+        with patch('models.pdbt_rate.PdbtRateData.get_charges', return_value=self.mock_charges):
+            pdbt_rate = PdbtRate(self.state, self.end_month)
+
+            self.assertEqual(pdbt_rate.fix_charge, 100)
+
     def test_calculate_monthly_payments(self):
         with patch('models.pdbt_rate.PdbtRateData.get_charges', return_value=self.mock_charges):
             pdbt_rate = PdbtRate(self.state, self.end_month)

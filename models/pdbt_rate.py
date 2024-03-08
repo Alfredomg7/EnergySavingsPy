@@ -7,7 +7,8 @@ class PdbtRate(Rate):
         super().__init__(state, end_month)
         self._pdbt_rate_data = pdbt_rate_data or PdbtRateData()
         self._charges = self._pdbt_rate_data.get_charges(self._state, calculate_start_month(self._end_month), self._end_month)
-    
+        self._fix_charge = self._charges[0]["supplier"]
+        
     def _calculate_payment(self, charge, consumption):
         cost_components = [
             consumption * charge["transmission"],
