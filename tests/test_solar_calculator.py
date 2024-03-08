@@ -20,7 +20,23 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         invalid_system_size = Mock()
         with self.assertRaises(ValueError):
             self.calculator.calculate_new_monthly_payment(invalid_system_size)
-            
+
+    def test_calculate_monthly_energy_savings(self):
+        mock_pv_system = Mock(spec=PVSystem)
+        monthly_production_deficit = 100
+        monthly_production_surplus = 170
+
+        mock_pv_system.calculate_annual_energy_production.return_value = [monthly_production_deficit for _ in range(12)]
+        expected_monthly_energy_savings = [monthly_production_deficit for _ in range(12)]
+        actual_monthly_energy_savings = self.calculator.calculate_monthly_energy_savings(mock_pv_system)
+        self.assertEqual(actual_monthly_energy_savings, expected_monthly_energy_savings)
+
+        mock_pv_system.calculate_annual_energy_production.return_value = [monthly_production_surplus for _ in range(12)]
+        expected_monthly_energy_savings = [120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220 , 170]
+        actual_monthly_energy_savings = self.calculator.calculate_monthly_energy_savings(mock_pv_system)
+        self.assertEqual(actual_monthly_energy_savings, expected_monthly_energy_savings)
+
+
     def test_calculate_new_monthly_payment(self):
         mock_pv_system = Mock(spec=PVSystem)
         mock_pv_system.calculate_annual_energy_production.return_value = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]

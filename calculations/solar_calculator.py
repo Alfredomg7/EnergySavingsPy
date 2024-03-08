@@ -80,6 +80,12 @@ class SolarSavingsCalculator:
 
         return new_monthly_consumption
     
+    def calculate_monthly_energy_savings(self, pv_system):
+        pv_system = self._validate_pv_system(pv_system)
+        new_monthly_consumption = self.calculate_new_monthly_consumption(pv_system)
+        monthly_energy_savings = [current_consumption - new_consumption for current_consumption, new_consumption in zip(self.current_monthly_consumption, new_monthly_consumption)]
+        return monthly_energy_savings
+    
     def calculate_new_lifetime_consumption(self, pv_system):
         pv_system = self._validate_pv_system(pv_system)
         lifetime_production = pv_system.calculate_lifetime_production()
