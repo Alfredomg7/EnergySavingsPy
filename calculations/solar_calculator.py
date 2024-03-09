@@ -45,8 +45,9 @@ class SolarSavingsCalculator:
         offset = sum(pv_system.calculate_annual_energy_production()) / sum(self._current_monthly_consumption)
         return offset
     
-    def calculate_new_monthly_consumption(self, pv_system):
-        pv_system = self._validate_pv_system(pv_system)
+    def calculate_new_monthly_consumption(self, pv_system, validate=True):
+        if validate:
+            pv_system = self._validate_pv_system(pv_system)
         monthly_production = pv_system.calculate_annual_energy_production()
         new_monthly_consumption = []
         energy_bank = 0
@@ -82,12 +83,13 @@ class SolarSavingsCalculator:
     
     def calculate_monthly_energy_savings(self, pv_system):
         pv_system = self._validate_pv_system(pv_system)
-        new_monthly_consumption = self.calculate_new_monthly_consumption(pv_system)
+        new_monthly_consumption = self.calculate_new_monthly_consumption(pv_system, validate=False)
         monthly_energy_savings = [current_consumption - new_consumption for current_consumption, new_consumption in zip(self.current_monthly_consumption, new_monthly_consumption)]
         return monthly_energy_savings
     
-    def calculate_new_lifetime_consumption(self, pv_system):
-        pv_system = self._validate_pv_system(pv_system)
+    def calculate_new_lifetime_consumption(self, pv_system, validate=True):
+        if validate:
+            pv_system = self._validate_pv_system(pv_system)
         lifetime_production = pv_system.calculate_lifetime_production()
         annual_consumption = sum(self._current_monthly_consumption)
         offset = self.calculate_offset(pv_system, validate=False)
@@ -101,6 +103,13 @@ class SolarSavingsCalculator:
                 new_lifetime_consumption.append(max(new_consumption, 0))
 
         return new_lifetime_consumption
+    
+    def calculate_total_energy_savings(self, pv_system):
+        pv_system = self._validate_pv_system(pv_system)
+        new_lifetime_consumption = self.calculate_new_lifetime_consumption(pv_system, validate=False)
+        current_annual_consumption = sum(self.current_monthly_consumption)
+        total_energy_savings = [current_annual_consumption - new_annual_consumption for new_annual_consumption in new_lifetime_consumption]
+        return total_energy_savings
 
     def calculate_new_monthly_payment(self, pv_system):
         pv_system = self._validate_pv_system(pv_system)
