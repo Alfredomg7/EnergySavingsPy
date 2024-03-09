@@ -121,3 +121,8 @@ class SolarSavingsCalculator:
 
     def calculate_new_monthly_payment(self):
         return self.rate.calculate_monthly_payments(self.calculate_new_monthly_consumption())
+    
+    def calculate_monthly_payment_savings(self):
+        new_monthly_payment = self.calculate_new_monthly_payment()
+        monthly_payment_savings = [current_payment - new_payment for current_payment, new_payment in zip(self._current_payment, new_monthly_payment)]
+        return monthly_payment_savings
