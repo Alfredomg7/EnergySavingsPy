@@ -19,8 +19,10 @@ class TestPdbtRate(unittest.TestCase):
     def test_calculate_monthly_payments(self):
         with patch('models.pdbt_rate.PdbtRateData.get_charges', return_value=self.mock_charges):
             pdbt_rate = PdbtRate(self.state, self.end_month)
-
-            monthly_consumptions = [100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650]
+            start = 100
+            step = 50
+            months = 12
+            monthly_consumptions = [start + i * step for i in range(months)]
             monthly_payments = pdbt_rate.calculate_monthly_payments(monthly_consumptions)
 
             self.assertIsInstance(monthly_payments, list)

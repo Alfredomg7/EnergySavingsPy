@@ -7,8 +7,12 @@ from calculations.solar_calculator import SolarSavingsCalculator
 class TestSolarSavingsCalculator(unittest.TestCase):
     def setUp(self):
         self.mock_rate = Mock(spec=Rate)
-        self.sample_consumption_data = [120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230]
-        self.mock_rate.calculate_monthly_payments.return_value = [100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210]
+        start = 120
+        step = 10
+        self.months = 12
+        self.sample_consumption_data = [start + i * step for i in range(self.months)]
+        start = 100
+        self.mock_rate.calculate_monthly_payments.return_value = [start + i * step for i in range(self.months)]
         self.calculator = SolarSavingsCalculator(self.mock_rate, self.sample_consumption_data)
 
     def test_rate_validation(self):
@@ -23,41 +27,53 @@ class TestSolarSavingsCalculator(unittest.TestCase):
 
     def test_calculate_monthly_energy_savings(self):
         mock_pv_system = Mock(spec=PVSystem)
-        monthly_production_deficit = 100
-        monthly_production_surplus = 170
+        monthly_production_deficit = [100 for _ in range(self.months)]
+        monthly_production_surplus = [170 for _ in range(self.months)]
 
-        mock_pv_system.calculate_annual_energy_production.return_value = [monthly_production_deficit for _ in range(12)]
-        expected_monthly_energy_savings = [monthly_production_deficit for _ in range(12)]
+        mock_pv_system.calculate_annual_energy_production.return_value = monthly_production_deficit
+        expected_monthly_energy_savings = monthly_production_deficit
         actual_monthly_energy_savings = self.calculator.calculate_monthly_energy_savings(mock_pv_system)
         self.assertEqual(actual_monthly_energy_savings, expected_monthly_energy_savings)
 
-        mock_pv_system.calculate_annual_energy_production.return_value = [monthly_production_surplus for _ in range(12)]
-        expected_monthly_energy_savings = [120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220 , 170]
+        mock_pv_system.calculate_annual_energy_production.return_value = monthly_production_surplus
+        expected_monthly_energy_savings = [120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 170]
         actual_monthly_energy_savings = self.calculator.calculate_monthly_energy_savings(mock_pv_system)
         self.assertEqual(actual_monthly_energy_savings, expected_monthly_energy_savings)
-
 
     def test_calculate_new_monthly_payment(self):
         mock_pv_system = Mock(spec=PVSystem)
-        mock_pv_system.calculate_annual_energy_production.return_value = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]
-        expected_new_monthly_consumption = [20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130]
-        new_monthly_payment = self.calculator.calculate_new_monthly_payment(mock_pv_system)
-        self.mock_rate.calculate_monthly_payments.assert_called_with(expected_new_monthly_consumption)
-        expected_new_monthly_payment = [100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210]
-        self.assertEqual(new_monthly_payment, expected_new_monthly_payment)
+        annual_energy_production_deficit = [100 for _ in range(self.months)]
+        annual_energy_production_surplus = [300 for _ in range(self.months)]
+
+        mock_pv_system.calculate_annual_energy_production.return_value = annual_energy_production_deficit
+        start = 20
+        step = 10 
+        expected_new_monthly_consumption_deficit = [start + i * step for i in range(self.months)]
+        self.mock_rate.calculate_monthly_payments.return_value = expected_new_monthly_consumption_deficit
+        new_monthly_payment_deficit = self.calculator.calculate_new_monthly_payment(mock_pv_system)
+        self.mock_rate.calculate_monthly_payments.assert_called_with(expected_new_monthly_consumption_deficit)
+        self.assertEqual(new_monthly_payment_deficit, expected_new_monthly_consumption_deficit)
+
+        mock_pv_system.calculate_annual_energy_production.return_value = annual_energy_production_surplus
+        expected_new_monthly_consumption_surplus = [0 for _ in range(self.months)]
+        expected_new_monthly_payment_surplus = [0 for _ in range(self.months)] 
+        self.mock_rate.calculate_monthly_payments.return_value = expected_new_monthly_payment_surplus
+        new_monthly_payment_surplus = self.calculator.calculate_new_monthly_payment(mock_pv_system)
+        self.mock_rate.calculate_monthly_payments.assert_called_with(expected_new_monthly_consumption_surplus)
+        self.assertEqual(new_monthly_payment_surplus, expected_new_monthly_payment_surplus)
 
     def test_calculate_new_lifetime_consumption(self):
         mock_pv_system = Mock(spec=PVSystem)
-        
-        annual_energy_production_deficit = [150 for _ in range(12)]
+        step = 50
+        years = 10
+
+        annual_energy_production_deficit = [150 for _ in range(self.months)]
         start = sum(annual_energy_production_deficit)
-        step = 50
-        lifetime_production_deficit = [start - i * step for i in range(10) ]
+        lifetime_production_deficit = [start - i * step for i in range(years) ]
         
-        annual_energy_production_surplus = [200 for _ in range(12)]
+        annual_energy_production_surplus = [200 for _ in range(self.months)]
         start = sum(annual_energy_production_surplus)
-        step = 50
-        lifetime_production_surplus= [start - i * step for i in range(10) ]
+        lifetime_production_surplus= [start - i * step for i in range(years) ]
 
         mock_pv_system.calculate_annual_energy_production.return_value = annual_energy_production_deficit
         mock_pv_system.calculate_lifetime_production.return_value = lifetime_production_deficit

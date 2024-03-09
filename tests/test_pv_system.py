@@ -8,7 +8,10 @@ class TestPVSystem(unittest.TestCase):
     def setUp(self):
         self.pv_module = PVModule(capacity=0.3, tilt_angle=31, efficiency=0.8, lifespan=25, annual_degradation=0.005)
         self.mock_location = Mock(spec=Location)
-        self.mock_location.get_solar_hours.return_value = [5, 5.5, 6, 6.5, 7, 7.5, 7, 6.5, 6, 5.5, 5, 4.5]
+        start = 5
+        step = 0.5
+        middle = 7
+        self.mock_location.get_solar_hours.return_value = [start + i * step for i in range(6)] + [middle - i * step for i in range(6)]
 
     def test_valid_initialization(self):
         try:
