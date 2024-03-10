@@ -97,7 +97,7 @@ class SolarSavingsCalculator:
     
     def calculate_monthly_energy_savings(self):
         new_monthly_consumption = self.calculate_new_monthly_consumption()
-        monthly_energy_savings = [current_consumption - new_consumption for current_consumption, new_consumption in zip(self.current_monthly_consumption, new_monthly_consumption)]
+        monthly_energy_savings = [current - new for current, new in zip(self.current_monthly_consumption, new_monthly_consumption)]
         return monthly_energy_savings
     
     def calculate_new_lifetime_consumption(self):
@@ -118,7 +118,7 @@ class SolarSavingsCalculator:
     def calculate_total_energy_savings(self):
         new_lifetime_consumption = self.calculate_new_lifetime_consumption()
         current_annual_consumption = sum(self.current_monthly_consumption)
-        total_energy_savings = [current_annual_consumption - new_annual_consumption for new_annual_consumption in new_lifetime_consumption]
+        total_energy_savings = [current_annual_consumption - new_consumption for new_consumption in new_lifetime_consumption]
         return total_energy_savings
 
     def calculate_new_monthly_payment(self):
@@ -126,7 +126,7 @@ class SolarSavingsCalculator:
     
     def calculate_monthly_payment_savings(self):
         new_monthly_payment = self.calculate_new_monthly_payment()
-        monthly_payment_savings = [current_payment - new_payment for current_payment, new_payment in zip(self._current_payment, new_monthly_payment)]
+        monthly_payment_savings = [current - new for current, new in zip(self._current_payment, new_monthly_payment)]
         return monthly_payment_savings
     
     def calculate_new_lifetime_payments(self, annual_inflation=0.05):
@@ -146,4 +146,9 @@ class SolarSavingsCalculator:
                 new_lifetime_payment.append(round(annual_payment,2))
         
         return new_lifetime_payment
-
+    
+    def calculate_total_payments_savings(self, annual_inflation=0.05):
+        new_lifetime_payments = self.calculate_new_lifetime_payments(annual_inflation)
+        current_lifetime_payments = [round(sum(self._current_payment) * (1 + annual_inflation) ** i, 2) for i in range(len(new_lifetime_payments))]
+        total_payments_savings = [current - new for current, new in zip(current_lifetime_payments, new_lifetime_payments)]
+        return total_payments_savings
