@@ -147,7 +147,7 @@ class SolarSavingsCalculator:
         
         return new_lifetime_payment
     
-    def calculate_total_payments_savings(self, annual_inflation=0.05):
+    def calculate_total_payment_savings(self, annual_inflation=0.05):
         new_lifetime_payments = self.calculate_new_lifetime_payments(annual_inflation)
         current_lifetime_payments = [round(sum(self._current_payment) * (1 + annual_inflation) ** i, 2) for i in range(len(new_lifetime_payments))]
         total_payments_savings = [current - new for current, new in zip(current_lifetime_payments, new_lifetime_payments)]

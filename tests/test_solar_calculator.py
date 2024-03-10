@@ -139,7 +139,7 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         actual_lifetime_payments_deficit = self.calculator.calculate_new_lifetime_payments()
         self.assertEqual(actual_lifetime_payments_deficit, expected_lifetime_payments_deficit)
 
-    def test_calculate_total_payments_savings(self):
+    def test_calculate_total_payment_savings(self):
         lifetime = 25
         annual_increase = 1.05
 
@@ -150,7 +150,7 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         current_lifetime_payment = [year_1_payment * ((annual_increase) ** i) for i in range(lifetime)]
         new_lifetime_payments = [self.mock_rate.fix_charge * ((annual_increase) ** i) for i in range(lifetime)]
         expected_payments_savings = [round(current - new, 2) for current, new in zip(current_lifetime_payment, new_lifetime_payments)]
-        actual_payments_savings = self.calculator.calculate_total_payments_savings()
+        actual_payments_savings = self.calculator.calculate_total_payment_savings()
         self.assertEqual(actual_payments_savings, expected_payments_savings)
 
         deficit_consumption = self.sample_consumption_data
@@ -160,7 +160,7 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         new_lifetime_payments = self.calculator.calculate_new_lifetime_payments()
         current_lifetime_payment = [year_1_payment * (annual_increase ** i) for i in range(lifetime)]
         expected_payments_savings = [round(current - new, 2) for current, new in zip(current_lifetime_payment, new_lifetime_payments)]
-        actual_payments_savings = self.calculator.calculate_total_payments_savings()
+        actual_payments_savings = self.calculator.calculate_total_payment_savings()
         self.assertEqual(actual_payments_savings, expected_payments_savings)
 
 if __name__ == '__main__':
