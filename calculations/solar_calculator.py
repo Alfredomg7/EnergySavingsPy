@@ -20,6 +20,8 @@ class SolarSavingsCalculator:
         return value
     
     def _calculate_offset(self):
+        if sum(self.current_monthly_consumption) == 0:
+            return 1
         offset = sum(self._pv_system.calculate_annual_energy_production()) / sum(self._current_monthly_consumption)
         return offset
     
@@ -126,3 +128,22 @@ class SolarSavingsCalculator:
         new_monthly_payment = self.calculate_new_monthly_payment()
         monthly_payment_savings = [current_payment - new_payment for current_payment, new_payment in zip(self._current_payment, new_monthly_payment)]
         return monthly_payment_savings
+    
+    def calculate_new_lifetime_payments(self, annual_inflation=0.05):
+        new_lifetime_consumption = self.calculate_new_lifetime_consumption()
+        year_1_payment = round(sum(self.calculate_new_monthly_payment()), 2)
+        year_1_consumption = sum(self.calculate_new_monthly_consumption())
+        year_1_fix_charge_payment = self.rate.fix_charge
+        annual_increase = 1 +  annual_inflation
+        new_lifetime_payment = [year_1_payment]
+
+        for i in range(1, len(new_lifetime_consumption)):
+            if new_lifetime_consumption[i] == 0:
+                annual_payment = year_1_fix_charge_payment * ( annual_increase ** i)
+                new_lifetime_payment.append(round(annual_payment,2))
+            else:
+                annual_payment = (((year_1_payment - year_1_fix_charge_payment) * (new_lifetime_consumption[i] / year_1_consumption)) + year_1_fix_charge_payment) * (annual_increase ** i)
+                new_lifetime_payment.append(round(annual_payment,2))
+        
+        return new_lifetime_payment
+

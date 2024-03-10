@@ -12,6 +12,7 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         step = 10
         self.months = 12
         self.mock_rate.calculate_monthly_payments.return_value = [start + i * step for i in range(self.months)]
+        self.mock_rate.fix_charge = 1860
         start = 120
         self.sample_consumption_data = [start + i * step for i in range(self.months)]
         self.mock_pv_system.calculate_annual_energy_production.return_value = [100 for _ in range(self.months)]
@@ -113,6 +114,28 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         expected_monthly_payment_savings = [i - j for i, j in zip(initial_payments, new_payments)]
         actual_monthly_payment_savings = self.calculator.calculate_monthly_payment_savings()
         self.assertEqual(actual_monthly_payment_savings, expected_monthly_payment_savings)
+
+    def test_calculate_new_lifetime_payments(self):
+        surplus_consumption = [0] * self.months
+        surplus_lifetime_consumption = [0] * 25 
+        self.mock_pv_system.calculate_lifetime_production.return_value = surplus_lifetime_consumption
+        self.calculator = SolarSavingsCalculator(self.mock_rate, self.mock_pv_system, surplus_consumption)
+        expected_lifetime_payments_surplus = [round(self.mock_rate.fix_charge * ((1 + 0.05) ** i), 2) for i in range(25)]
+        actual_lifetime_payments_surplus = self.calculator.calculate_new_lifetime_payments()
+        self.assertEqual(actual_lifetime_payments_surplus, expected_lifetime_payments_surplus)
+
+        deficit_consumption = [120 + i * 10 for i in range(self.months)]  
+        deficit_lifetime_consumption = [sum(deficit_consumption) - i * 1000 for i in range(25)]  # Sample decreasing consumption over years
+        self.mock_pv_system.calculate_lifetime_production.return_value = deficit_lifetime_consumption
+        self.calculator = SolarSavingsCalculator(self.mock_rate, self.mock_pv_system, deficit_consumption)
+        year_1_payment = round(sum(self.mock_rate.calculate_monthly_payments(deficit_consumption)), 2)
+        year_1_consumption = sum(deficit_consumption)
+        expected_lifetime_payments_deficit = [year_1_payment]
+        for i in range(1, 25):
+            annual_payment = (((year_1_payment - self.mock_rate.fix_charge) * (deficit_lifetime_consumption[i] / year_1_consumption)) + self.mock_rate.fix_charge) * (1.05 ** i)
+            expected_lifetime_payments_deficit.append(round(annual_payment, 2))
+        actual_lifetime_payments_deficit = self.calculator.calculate_new_lifetime_payments()
+        self.assertEqual(actual_lifetime_payments_deficit, expected_lifetime_payments_deficit)
 
 if __name__ == '__main__':
     unittest.main()
