@@ -35,12 +35,22 @@ class TestPVSystem(unittest.TestCase):
         with self.assertRaises(ValueError):
             PVSystem(pv_module=self.pv_module, pv_module_count=10, efficiency=0.95, location='not a location')
 
+    def test_invalid_cost_per_kw(self):
+        with self.assertRaises(ValueError):
+            PVSystem(pv_module=self.pv_module, pv_module_count=10, efficiency=0.95, location=self.mock_location, cost_per_kw=-100)
+    
     def test_system_size(self):
         pv_system = PVSystem(pv_module=self.pv_module, pv_module_count=10, efficiency=1, location=self.mock_location)
         expected_size = 3
         actual_size = pv_system.system_size
         self.assertEqual(actual_size, expected_size, msg=f"Expected {expected_size} kW, got {actual_size} kW")
-
+    
+    def test_installation_cost(self):
+        pv_system = PVSystem(pv_module=self.pv_module, pv_module_count=10, efficiency=1, location=self.mock_location, cost_per_kw=25000)
+        expected_installation_cost = 75000
+        actual_installation_cost = pv_system.installation_cost
+        self.assertEqual(actual_installation_cost, expected_installation_cost, msg=f"Expected ${expected_installation_cost}, got ${actual_installation_cost}")
+    
     def test_energy_production(self):
         pv_system = PVSystem(pv_module=self.pv_module, pv_module_count=10, efficiency=1, location=self.mock_location)
         expected_production = [372.00, 369.60, 446.40, 468.00, 520.80, 540.00, 520.80, 483.60, 432.00, 409.20, 360.00, 334.80]

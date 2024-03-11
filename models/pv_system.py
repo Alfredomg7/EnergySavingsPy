@@ -2,14 +2,16 @@ from models.pv_module import PVModule
 from models.location import Location
 
 class PVSystem:
-    def __init__(self, pv_module, pv_module_count, efficiency, location):
+    def __init__(self, pv_module, pv_module_count, efficiency, location, cost_per_kw=20000):
         self._pv_module = self._validate_pv_module(pv_module)
         self._pv_module_count = self._validate_pv_module_count(pv_module_count)
         self._efficiency = self._validate_efficiency(efficiency)
         self._location = self._validate_location(location)
+        self._cost_per_kw = self._validate_cost_per_kw(cost_per_kw)
         self._system_size = self._calculate_system_size()
         self._monthly_energy_production = self._calculate_monthly_energy_production()
-    
+        self._installation_cost = self._calculate_installation_cost()
+
     def _validate_pv_module(self, value):
         if not isinstance(value, PVModule):
             raise ValueError("pv_module must be an instance of PVModule")
@@ -30,9 +32,17 @@ class PVSystem:
             raise ValueError("location must be an instance of Location")
         return value
     
+    def _validate_cost_per_kw(self, value):
+        if not value > 0:
+            raise ValueError("Cost per kW must be greater than 0")
+        return value
+    
     def _calculate_system_size(self):
         return self._pv_module.capacity * self._pv_module_count
 
+    def _calculate_installation_cost(self):
+        return self._system_size * self._cost_per_kw
+    
     @property
     def pv_module(self):
         return self._pv_module
@@ -75,10 +85,14 @@ class PVSystem:
     def system_size(self):
         return self._system_size
     
+    @property
+    def installation_cost(self):
+        return self._installation_cost
+    
     @property 
     def monthly_energy_production(self):
         return self._monthly_energy_production
-     
+    
     def _calculate_monthly_energy_production(self):
         annual_production = []
         solar_hours = self._location.get_solar_hours(self._pv_module.tilt_angle)
