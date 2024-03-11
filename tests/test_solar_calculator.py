@@ -15,7 +15,7 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         self.mock_rate.fix_charge = 1860
         start = 120
         self.sample_consumption_data = [start + i * step for i in range(self.months)]
-        self.mock_pv_system.calculate_annual_energy_production.return_value = [100 for _ in range(self.months)]
+        self.mock_pv_system.monthly_energy_production = [100 for _ in range(self.months)]
         self.calculator = SolarSavingsCalculator(self.mock_rate, self.mock_pv_system, self.sample_consumption_data)
 
     def test_rate_validation(self):
@@ -32,13 +32,13 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         monthly_production_deficit = [100 for _ in range(self.months)]
         monthly_production_surplus = [170 for _ in range(self.months)]
 
-        self.mock_pv_system.calculate_annual_energy_production.return_value = monthly_production_deficit
+        self.mock_pv_system.monthly_energy_production = monthly_production_deficit
         self.calculator.pv_system = self.mock_pv_system
         expected_monthly_energy_savings = monthly_production_deficit
         actual_monthly_energy_savings = self.calculator.calculate_monthly_energy_savings()
         self.assertEqual(actual_monthly_energy_savings, expected_monthly_energy_savings)
 
-        self.mock_pv_system.calculate_annual_energy_production.return_value = monthly_production_surplus
+        self.mock_pv_system.monthly_energy_production = monthly_production_surplus
         self.calculator.pv_system = self.mock_pv_system
         expected_monthly_energy_savings = [120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 170]
         actual_monthly_energy_savings = self.calculator.calculate_monthly_energy_savings()
@@ -56,14 +56,14 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         start = sum(monthly_production_surplus)
         lifetime_production_surplus = [start - i * step for i in range(lifetime)]
 
-        self.mock_pv_system.calculate_annual_energy_production.return_value = monthly_production_deficit
+        self.mock_pv_system.monthly_energy_production = monthly_production_deficit
         self.mock_pv_system.calculate_lifetime_production.return_value = lifetime_production_deficit
         self.calculator.pv_system = self.mock_pv_system
         expected_total_savings = lifetime_production_deficit
         actual_total_savings = self.calculator.calculate_total_energy_savings()
         self.assertEqual(actual_total_savings, expected_total_savings)
 
-        self.mock_pv_system.calculate_annual_energy_production.return_value = monthly_production_surplus
+        self.mock_pv_system.monthly_energy_production = monthly_production_surplus
         self.mock_pv_system.calculate_lifetime_production.return_value = lifetime_production_surplus
         self.calculator.pv_system = self.mock_pv_system
         expected_total_savings = [min(production, sum(self.sample_consumption_data)) for production in lifetime_production_surplus]
@@ -82,14 +82,14 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         start = sum(annual_energy_production_surplus)
         lifetime_production_surplus= [start - i * step for i in range(lifetime)]
 
-        self.mock_pv_system.calculate_annual_energy_production.return_value = annual_energy_production_deficit
+        self.mock_pv_system.monthly_energy_production = annual_energy_production_deficit
         self.mock_pv_system.calculate_lifetime_production.return_value = lifetime_production_deficit
         self.calculator.pv_system = self.mock_pv_system
         expected_consumption_deficit = [sum(self.sample_consumption_data) - production for production in lifetime_production_deficit]
         actual_consumption_deficit = self.calculator.calculate_new_lifetime_consumption()
         self.assertEqual(actual_consumption_deficit, expected_consumption_deficit)
 
-        self.mock_pv_system.calculate_annual_energy_production.return_value = annual_energy_production_surplus
+        self.mock_pv_system.monthly_energy_production = annual_energy_production_surplus
         self.mock_pv_system.calculate_lifetime_production.return_value = lifetime_production_surplus
         self.calculator.pv_system = self.mock_pv_system
         expected_consumption_surplus = [max(sum(self.sample_consumption_data) - production, 0) for production in lifetime_production_surplus]
@@ -98,7 +98,7 @@ class TestSolarSavingsCalculator(unittest.TestCase):
 
     def test_calculate_new_monthly_payment(self):
         self.mock_rate.calculate_monthly_payments.return_value = [90 + i * 5 for i in range(self.months)]
-        self.mock_pv_system.calculate_annual_energy_production.return_value = [95 + i * 2 for i in range(self.months)]
+        self.mock_pv_system.monthly_energy_production = [95 + i * 2 for i in range(self.months)]
         self.calculator.rate = self.mock_rate
         self.calculator.pv_system = self.mock_pv_system
         expected_new_monthly_payments = self.mock_rate.calculate_monthly_payments(self.calculator.calculate_new_monthly_consumption())

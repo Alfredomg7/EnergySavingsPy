@@ -22,7 +22,7 @@ class SolarSavingsCalculator:
     def _calculate_offset(self):
         if sum(self.current_monthly_consumption) == 0:
             return 1
-        offset = sum(self._pv_system.calculate_annual_energy_production()) / sum(self._current_monthly_consumption)
+        offset = sum(self._pv_system.monthly_energy_production) / sum(self._current_monthly_consumption)
         return offset
     
     @property
@@ -62,7 +62,7 @@ class SolarSavingsCalculator:
         return self._offset
     
     def calculate_new_monthly_consumption(self):
-        monthly_production = self._pv_system.calculate_annual_energy_production()
+        monthly_production = self._pv_system.monthly_energy_production
         new_monthly_consumption = []
         energy_bank = 0
 
@@ -72,13 +72,8 @@ class SolarSavingsCalculator:
                 new_monthly_consumption.append(0)
                 energy_bank = net_energy
             else:
-                net_deficit = net_energy + energy_bank
-                if net_deficit >= 0:
-                    energy_bank = net_deficit
-                    new_monthly_consumption.append(0)
-                else:
-                    new_monthly_consumption.append(round(abs(net_energy), 2))
-                    energy_bank = 0
+                new_monthly_consumption.append(round(abs(net_energy), 2))
+                energy_bank = 0
         
         if energy_bank > 0:
             for i in range(len(new_monthly_consumption)):
