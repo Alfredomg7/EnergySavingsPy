@@ -110,21 +110,15 @@ class SolarSavingsCalculator:
 
         return new_lifetime_consumption
     
-    def calculate_yearly_energy_savings(self):
+    def calculate_yearly_energy_savings(self, cumulative=False):
         new_lifetime_consumption = self.calculate_new_lifetime_consumption()
         current_annual_consumption = sum(self.current_monthly_consumption)
         yearly_energy_savings = [current_annual_consumption - new_consumption for new_consumption in new_lifetime_consumption]
-        return yearly_energy_savings
-    
-    def calculate_cumulative_energy_savings(self):
-        yearly_energy_savings = self.calculate_yearly_energy_savings()
-        cumulative_energy_savings = []
-        cumulative_sum = 0
 
-        for yearly_saving in yearly_energy_savings:
-            cumulative_sum += yearly_saving
-            cumulative_energy_savings.append(cumulative_sum)
-        
+        if not cumulative:
+            return yearly_energy_savings
+
+        cumulative_energy_savings = [sum(yearly_energy_savings[:i+1]) for i in range(len(yearly_energy_savings))]
         return cumulative_energy_savings
     
     def calculate_new_monthly_payment(self):
