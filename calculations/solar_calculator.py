@@ -147,8 +147,48 @@ class SolarSavingsCalculator:
         
         return new_lifetime_payment
     
-    def calculate_total_payment_savings(self, annual_inflation=0.05):
+    def calculate_yearly_payments_savings(self, annual_inflation=0.05):
         new_lifetime_payments = self.calculate_new_lifetime_payments(annual_inflation)
         current_lifetime_payments = [round(sum(self._current_payment) * (1 + annual_inflation) ** i, 2) for i in range(len(new_lifetime_payments))]
         total_payments_savings = [current - new for current, new in zip(current_lifetime_payments, new_lifetime_payments)]
         return total_payments_savings
+    
+    def calculate_cash_flow(self, cumulative=False):
+        initial_outflow = -self._pv_system.installation_cost
+        yearly_cash_flows = [initial_outflow]
+        yearly_payments_savings = self.calculate_yearly_payments_savings()
+        yearly_cash_flows.extend(yearly_payments_savings)
+
+        if not cumulative:
+            return yearly_cash_flows
+        
+        cumulative_cash_flows = [sum(yearly_cash_flows[:i+1]) for i in range(len(yearly_cash_flows))]
+        
+        return cumulative_cash_flows      
+
+    def calculate_roi(self):
+        cash_flows = self.calculate_cash_flow()
+        total_investment = -cash_flows[0]
+        total_returns = sum(cash_flows[1:])
+        return round((total_returns - total_investment) /  total_investment, 2)
+    
+    def calculate_payback_period(self):
+        cumulative_cash_flows = self.calculate_cash_flow(cumulative=True)
+        first_positive_cashflow_year = -1
+        last_negative_cashflow_year = -1
+        for year, cash_flow in enumerate(cumulative_cash_flows):
+            if cash_flow >= 0:
+                first_positive_cashflow_year = year
+                last_negative_cashflow_year = year - 1
+                break
+        
+        if first_positive_cashflow_year == -1:
+            return None
+        
+        last_negative_cashflow = cumulative_cash_flows[last_negative_cashflow_year]
+        first_positive_cashflow = cumulative_cash_flows[first_positive_cashflow_year]
+        fractional_year = -last_negative_cashflow / (first_positive_cashflow - last_negative_cashflow)
+        payback_period = last_negative_cashflow_year + fractional_year
+
+        return payback_period
+        

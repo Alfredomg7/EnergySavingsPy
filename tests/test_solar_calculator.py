@@ -149,7 +149,7 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         actual_lifetime_payments_deficit = self.calculator.calculate_new_lifetime_payments()
         self.assertEqual(actual_lifetime_payments_deficit, expected_lifetime_payments_deficit)
 
-    def test_calculate_total_payment_savings(self):
+    def test_calculate_yearly_payments_savings(self):
         lifetime = 25
         annual_increase = 1.05
 
@@ -160,7 +160,7 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         current_lifetime_payment = [year_1_payment * ((annual_increase) ** i) for i in range(lifetime)]
         new_lifetime_payments = [self.mock_rate.fix_charge * ((annual_increase) ** i) for i in range(lifetime)]
         expected_payments_savings = [round(current - new, 2) for current, new in zip(current_lifetime_payment, new_lifetime_payments)]
-        actual_payments_savings = self.calculator.calculate_total_payment_savings()
+        actual_payments_savings = self.calculator.calculate_yearly_payments_savings()
         self.assertEqual(actual_payments_savings, expected_payments_savings)
 
         deficit_consumption = self.sample_consumption_data
@@ -170,8 +170,63 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         new_lifetime_payments = self.calculator.calculate_new_lifetime_payments()
         current_lifetime_payment = [year_1_payment * (annual_increase ** i) for i in range(lifetime)]
         expected_payments_savings = [round(current - new, 2) for current, new in zip(current_lifetime_payment, new_lifetime_payments)]
-        actual_payments_savings = self.calculator.calculate_total_payment_savings()
+        actual_payments_savings = self.calculator.calculate_yearly_payments_savings()
         self.assertEqual(actual_payments_savings, expected_payments_savings)
+    
+    def test_calculate_cash_flow(self):
+        lifetime = 10
+        step = 50
+        installation_cost = 10000
+        self.mock_pv_system.installation_cost = installation_cost
+        yearly_payments_savings = [step * i for i in range(1, lifetime + 1)]
+        self.calculator.calculate_yearly_payments_savings = Mock(return_value=yearly_payments_savings )
+
+        expected_yearly_cash_flows = [-installation_cost] + yearly_payments_savings
+        actual_yearly_cash_flows = self.calculator.calculate_cash_flow()
+        self.assertEqual(actual_yearly_cash_flows, expected_yearly_cash_flows)
+
+        expected_cumulative_cash_flows = [sum(expected_yearly_cash_flows[:i+1]) for i in range(len(expected_yearly_cash_flows))]
+        actual_cumulative_cash_flows = self.calculator.calculate_cash_flow(cumulative=True)
+        self.assertEqual(actual_cumulative_cash_flows, expected_cumulative_cash_flows)
+
+    def test_calculate_roi(self):
+        initial_investment_profitable = -1000
+        yearly_returns_profitable = [300, 400, 350, 450]
+        self.calculator.calculate_cash_flow = Mock(return_value=[initial_investment_profitable] + yearly_returns_profitable)
+
+        expected_roi_profitable = round((sum(yearly_returns_profitable) - abs(initial_investment_profitable)) / abs(initial_investment_profitable), 2)
+        actual_roi_profitable = self.calculator.calculate_roi()
+        self.assertEqual(actual_roi_profitable, expected_roi_profitable)
+
+        initial_investment_non_profitable = -2000
+        yearly_returns_non_profitable = yearly_returns_profitable  
+        self.calculator.calculate_cash_flow = Mock(return_value=[initial_investment_non_profitable] + yearly_returns_non_profitable)
+
+        expected_roi_non_profitable = round((sum(yearly_returns_non_profitable) - abs(initial_investment_non_profitable)) / abs(initial_investment_non_profitable), 2)
+        actual_roi_non_profitable = self.calculator.calculate_roi()
+        self.assertEqual(actual_roi_non_profitable, expected_roi_non_profitable)
+
+    def test_calculate_payback_period(self):
+        initial_investment_profitable = -1000
+        cumulative_returns_profitable = [-700, -300, 100, 600]
+        self.calculator.calculate_cash_flow = Mock(cumulative=True, return_value=[initial_investment_profitable] + cumulative_returns_profitable)
+        
+        last_negative_cashflow_profitable = cumulative_returns_profitable[-3]
+        first_positive_cashflow_profitable = cumulative_returns_profitable[-2]
+        fractional_year_profitable = -last_negative_cashflow_profitable / (first_positive_cashflow_profitable - last_negative_cashflow_profitable)
+        expected_payback_period_profitable = 2 + fractional_year_profitable
+
+        actual_payback_period_profitable = self.calculator.calculate_payback_period()
+        self.assertEqual(actual_payback_period_profitable, expected_payback_period_profitable)
+
+        initial_investment_non_profitable = -20000
+        cumulative_returns_non_profitable = [-19900, -19800, -19700, -19500]
+        self.calculator.calculate_cash_flow = Mock(cumulative=True, return_value=[initial_investment_non_profitable] + cumulative_returns_non_profitable)
+        
+        expected_payback_period_non_profitable = None
+        actual_payback_period_non_profitable = self.calculator.calculate_payback_period()
+        self.assertEqual(actual_payback_period_non_profitable, expected_payback_period_non_profitable)
+
 
 if __name__ == '__main__':
     unittest.main()
