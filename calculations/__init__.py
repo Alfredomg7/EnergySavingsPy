@@ -1,1 +1,2 @@
 from .solar_calculator import SolarSavingsCalculator
+from .environmental_impact_calculator import EnvironmentalImpactCalculator

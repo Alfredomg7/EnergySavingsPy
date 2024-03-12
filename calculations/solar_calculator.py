@@ -1,5 +1,6 @@
 from models.pv_system import PVSystem
 from models.rate import Rate
+from calculations.environmental_impact_calculator import EnvironmentalImpactCalculator
 
 class SolarSavingsCalculator:
     def __init__(self, rate, pv_system, current_monthly_consumption):
@@ -191,4 +192,16 @@ class SolarSavingsCalculator:
         payback_period = last_negative_cashflow_year + fractional_year
 
         return payback_period
+    
+    def calculate_environmental_impact(self):
+        total_energy_savings = sum(self.calculate_yearly_energy_savings())
+        calculator = EnvironmentalImpactCalculator(total_energy_savings)
+        
+        co2_saved = calculator.calculate_co2_emission_saved()
+        trees_planted = calculator.calculate_trees_planted(co2_saved)
+
+        return {
+            "kg_co2_saved": co2_saved,
+            "trees_planted": trees_planted
+        }
         
