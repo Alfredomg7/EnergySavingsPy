@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from models.pv_system import PVSystem
 from models.rate import Rate
 from calculations.solar_calculator import SolarSavingsCalculator
@@ -227,6 +227,22 @@ class TestSolarSavingsCalculator(unittest.TestCase):
         actual_payback_period_non_profitable = self.calculator.calculate_payback_period()
         self.assertEqual(actual_payback_period_non_profitable, expected_payback_period_non_profitable)
 
+    def test_calculate_environmental_impact(self):
+        lifetime = 25
+        annual_savings = 1000
+        kg_co2_per_kwh = 0.458
+        trees_planted_per_kg_co2 = 0.001
+        yearly_energy_savings = [annual_savings for _ in range(lifetime)]
+        self.calculator.calculate_yearly_energy_savings = Mock(return_value=yearly_energy_savings)
+        environmental_impact = self.calculator.calculate_environmental_impact()
 
+        expected_co2_saved =  round(sum(yearly_energy_savings) * kg_co2_per_kwh, 2)
+        actual_co2_saved = environmental_impact["kg_co2_saved"]
+        self.assertEqual(actual_co2_saved, expected_co2_saved)
+
+        expected_trees_planted = round(expected_co2_saved * trees_planted_per_kg_co2, 2)
+        actual_trees_planted = environmental_impact["trees_planted"]
+        self.assertEqual(actual_trees_planted, expected_trees_planted)
+        
 if __name__ == '__main__':
     unittest.main()
