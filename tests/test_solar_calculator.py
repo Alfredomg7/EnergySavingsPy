@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 from models.pv_system import PVSystem
 from models.rate import Rate
 from calculations.solar_calculator import SolarSavingsCalculator

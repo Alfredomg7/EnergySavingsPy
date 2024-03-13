@@ -9,6 +9,7 @@ class SolarSavingsCalculator:
         self._current_monthly_consumption = current_monthly_consumption
         self._current_payment = rate.calculate_monthly_payments(current_monthly_consumption)
         self._offset = self._calculate_offset()
+        self._invalidate_caches()
 
     def _validate_rate(self, value):
         if not isinstance(value, Rate):
@@ -26,6 +27,17 @@ class SolarSavingsCalculator:
         offset = sum(self._pv_system.monthly_energy_production) / sum(self._current_monthly_consumption)
         return offset
     
+    def _invalidate_caches(self):
+        self._new_monthly_consumption_cache = None
+        self._new_lifetime_consumption_cache = None
+        self._yearly_energy_savings_cache = None
+        self._cumulative_energy_savings_cache = None
+        self._new_monthly_payment_cache = None
+        self._new_lifetime_payments_cache = None
+        self._yearly_payments_savings_cache = None
+        self._yearly_cashflow_cache = None
+        self._cumulative_cashflow_cache = None
+
     @property
     def rate(self):
         return self._rate
@@ -34,6 +46,7 @@ class SolarSavingsCalculator:
     def rate(self, value):
         self._rate = self._validate_rate(value)
         self._current_payment = self._rate.calculate_monthly_payments(self._current_monthly_consumption)
+        self._invalidate_caches()
 
     @property
     def pv_system(self):
@@ -43,6 +56,7 @@ class SolarSavingsCalculator:
     def pv_system(self, value):
         self._pv_system = self._validate_pv_system(value)
         self._offset =  self._calculate_offset()
+        self._invalidate_caches()
 
     @property
     def current_monthly_consumption(self):
@@ -53,6 +67,7 @@ class SolarSavingsCalculator:
         self._current_monthly_consumption = value
         self._current_payment = self._rate.calculate_monthly_payments(self._current_monthly_consumption)
         self._offset = self._calculate_offset()
+        self._invalidate_caches()
 
     @property
     def current_payment(self):
@@ -63,6 +78,9 @@ class SolarSavingsCalculator:
         return self._offset
     
     def calculate_new_monthly_consumption(self):
+        if self._new_monthly_consumption_cache is not None:
+            return self._new_monthly_consumption_cache
+        
         monthly_production = self._pv_system.monthly_energy_production
         new_monthly_consumption = []
         energy_bank = 0
@@ -89,6 +107,7 @@ class SolarSavingsCalculator:
                         new_monthly_consumption[i] = round(new_monthly_consumption[i], 2)
                         energy_bank = 0
 
+        self._new_monthly_consumption_cache = new_monthly_consumption
         return new_monthly_consumption
     
     def calculate_monthly_energy_savings(self):
@@ -97,6 +116,9 @@ class SolarSavingsCalculator:
         return monthly_energy_savings
     
     def calculate_new_lifetime_consumption(self):
+        if self._new_lifetime_consumption_cache is not None:
+            return self._new_lifetime_consumption_cache
+        
         lifetime_production = self._pv_system.calculate_lifetime_production()
         annual_consumption = sum(self._current_monthly_consumption)
         new_lifetime_consumption = []
@@ -109,21 +131,36 @@ class SolarSavingsCalculator:
                 new_consumption = annual_consumption - production 
                 new_lifetime_consumption.append(max(new_consumption, 0))
 
+        self._new_lifetime_consumption_cache = new_lifetime_consumption
         return new_lifetime_consumption
     
     def calculate_yearly_energy_savings(self, cumulative=False):
+        if self._yearly_energy_savings_cache is not None and not cumulative:
+            return self._yearly_energy_savings_cache
+        if self._cumulative_energy_savings_cache is not None and cumulative:
+            return self._cumulative_cashflow_cache
+        
         new_lifetime_consumption = self.calculate_new_lifetime_consumption()
         current_annual_consumption = sum(self.current_monthly_consumption)
         yearly_energy_savings = [current_annual_consumption - new_consumption for new_consumption in new_lifetime_consumption]
 
         if not cumulative:
+            self._yearly_energy_savings_cache = yearly_energy_savings
             return yearly_energy_savings
 
         cumulative_energy_savings = [sum(yearly_energy_savings[:i+1]) for i in range(len(yearly_energy_savings))]
+        self._cumulative_energy_savings_cache = cumulative_energy_savings
         return cumulative_energy_savings
     
     def calculate_new_monthly_payment(self):
-        return self.rate.calculate_monthly_payments(self.calculate_new_monthly_consumption())
+        if self._new_monthly_payment_cache is not None:
+            return self._new_monthly_payment_cache
+        
+        new_monthly_consumption = self.calculate_new_monthly_consumption()
+        new_monthly_payment = self.rate.calculate_monthly_payments(new_monthly_consumption)
+        
+        self._calculate_new_monthly_payment = new_monthly_payment
+        return new_monthly_payment
     
     def calculate_monthly_payment_savings(self):
         new_monthly_payment = self.calculate_new_monthly_payment()
@@ -131,12 +168,17 @@ class SolarSavingsCalculator:
         return monthly_payment_savings
     
     def calculate_new_lifetime_payments(self, annual_inflation=0.05):
-        new_lifetime_consumption = self.calculate_new_lifetime_consumption()
-        year_1_payment = round(sum(self.calculate_new_monthly_payment()), 2)
-        year_1_consumption = sum(self.calculate_new_monthly_consumption())
+        if self._new_lifetime_payments_cache is not None:
+            return self._new_lifetime_payments_cache
+        
+        new_monthly_consumption = self.calculate_new_monthly_consumption()
+        year_1_consumption = sum(new_monthly_consumption)
+        new_monthly_payment = self.calculate_new_monthly_payment()
+        year_1_payment = round(sum(new_monthly_payment), 2)
         year_1_fix_charge_payment = self.rate.fix_charge
         annual_increase = 1 +  annual_inflation
         new_lifetime_payment = [year_1_payment]
+        new_lifetime_consumption = self.calculate_new_lifetime_consumption()
 
         for i in range(1, len(new_lifetime_consumption)):
             if new_lifetime_consumption[i] == 0:
@@ -146,25 +188,38 @@ class SolarSavingsCalculator:
                 annual_payment = (((year_1_payment - year_1_fix_charge_payment) * (new_lifetime_consumption[i] / year_1_consumption)) + year_1_fix_charge_payment) * (annual_increase ** i)
                 new_lifetime_payment.append(round(annual_payment,2))
         
+        self._new_lifetime_payments_cache = new_lifetime_payment
         return new_lifetime_payment
     
     def calculate_yearly_payments_savings(self, annual_inflation=0.05):
+        if self._yearly_payments_savings_cache is not None:
+            return self._yearly_payments_savings_cache
+        
         new_lifetime_payments = self.calculate_new_lifetime_payments(annual_inflation)
         current_lifetime_payments = [round(sum(self._current_payment) * (1 + annual_inflation) ** i, 2) for i in range(len(new_lifetime_payments))]
         total_payments_savings = [current - new for current, new in zip(current_lifetime_payments, new_lifetime_payments)]
+        
+        self._yearly_payments_savings_cache = total_payments_savings
         return total_payments_savings
     
     def calculate_cash_flow(self, cumulative=False):
+        if self._yearly_cashflow_cache is not None and not cumulative:
+            return self._yearly_cashflow_cache
+        if self._cumulative_cashflow_cache is not None and cumulative:
+            return self._cumulative_cashflow_cache
+        
         initial_outflow = -self._pv_system.installation_cost
         yearly_cash_flows = [initial_outflow]
         yearly_payments_savings = self.calculate_yearly_payments_savings()
         yearly_cash_flows.extend(yearly_payments_savings)
 
         if not cumulative:
+            self._yearly_cashflow_cache = yearly_cash_flows
             return yearly_cash_flows
         
         cumulative_cash_flows = [sum(yearly_cash_flows[:i+1]) for i in range(len(yearly_cash_flows))]
         
+        self._cumulative_cashflow_cache = cumulative_cash_flows
         return cumulative_cash_flows      
 
     def calculate_roi(self):
@@ -204,4 +259,3 @@ class SolarSavingsCalculator:
             "kg_co2_saved": co2_saved,
             "trees_planted": trees_planted
         }
-        
