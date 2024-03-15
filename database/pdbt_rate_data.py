@@ -6,16 +6,16 @@ class PdbtRateData(PdbtRateDAO):
     def __init__(self, db_path=config.DATABASE_PATH):
         self.db_path = db_path
 
-    def get_charges(self, state, start_month, end_month):
+    def get_charges(self, region_id, start_month, end_month):
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 query = """
                     SELECT billing_period, transmission, distribution, cenace, supplier, services, energy, capacity
                     FROM pdbt_rate
-                    WHERE state = ? AND billing_period >= ? AND billing_period <= ?
+                    WHERE region_id = ? AND billing_period BETWEEN ? AND ?
                 """
-                cursor.execute(query, (state, start_month, end_month))
+                cursor.execute(query, (region_id, start_month, end_month))
                 result = cursor.fetchall()
             if result:
                 columns = [column[0] for column in cursor.description]

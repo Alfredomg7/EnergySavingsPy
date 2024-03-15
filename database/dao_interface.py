@@ -12,5 +12,5 @@ class PdbtRateDAO(ABC):
 
 class LocationDAO(ABC):
     @abstractmethod
-    def get_state(self):
+    def get_region(self):
         pass

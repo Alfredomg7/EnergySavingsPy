@@ -5,11 +5,20 @@ import config
 
 def execute_bulk_insert(conn, sql, data):
     try:
-        conn.executemany(sql, data)
+        with conn:
+            conn.executemany(sql, data)
+    except sqlite3.IntegrityError as e:
+        print(f"Integrity error during bulk insert: {e}")
+    except sqlite3.OperationalError as e:
+        print(f"Operational error during bulk insert: {e}")
+    except sqlite3.ProgrammingError as e:
+        print(f"Programming error during bulk insert:: {e}")
+    except sqlite3.DataError as e:
+        print(f"Data error during bulk insert:: {e}")
     except sqlite3.DatabaseError as e:
-        print(f"Database error: {e}")
+        print(f"Database error during bulk insert:: {e}")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An unexpected error occurred during bulk insert: {e}")
 
 def populate_table_from_csv(conn, insert_sql, csv_file):
     try:
@@ -19,52 +28,75 @@ def populate_table_from_csv(conn, insert_sql, csv_file):
             execute_bulk_insert(conn, insert_sql, data_to_insert)
     except FileNotFoundError:
         print(f"File not found: {csv_file}")
+    except csv.Error as e:
+        print(f"CSV error ocurred: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred during CSV processing: {e}")
 
+def create_tables(conn):
+    try:
+        conn.execute('''
+        CREATE TABLE IF NOT EXISTS regions (
+            region_id INTEGER PRIMARY KEY,
+            region_name TEXT NOT NULL
+        )''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS locations (
+                location_id INTEGER PRIMARY KEY,
+                city TEXT NOT NULL,
+                region_id TEXT NOT NULL,
+                FOREIGN KEY (region_id) REFERENCES regions (region_id)
+            )''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS solar_hours (
+                solar_hour_id INTEGER PRIMARY KEY,
+                location_id INTEGER,
+                tilt_angle INTEGER,
+                month INTEGER,
+                solar_hours REAL NOT NULL,
+                FOREIGN KEY (location_id) REFERENCES locations (location_id)
+            )''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS pdbt_rate(
+                rate_id INTEGER PRIMARY KEY,
+                region_id INTEGER NOT NULL,
+                billing_period TEXT NOT NULL,
+                transmission REAL,
+                distribution REAL,
+                cenace REAL,
+                supplier REAL,
+                services REAL,
+                energy REAL,
+                capacity REAL,
+                UNIQUE(region_id, billing_period),
+                CHECK (billing_period LIKE '____-__'),
+                FOREIGN KEY (region_id) REFERENCES regions (region_id)
+            )''')
+    except sqlite3.OperationalError as e:
+        print(f"Operational error during table creation: {e}")
+    except sqlite3.DatabaseError as e:
+        print(f"Database error during table creation: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred during table creation: {e}")
+
+def populate_tables(conn):
+    populate_table_from_csv(conn, "INSERT INTO regions (region_name) VALUES(?)", config.REGIONS_CSV_PATH)
+    populate_table_from_csv(conn, "INSERT INTO locations (city, region_id) VALUES (?, ?)", config.LOCATIONS_CSV_PATH)
+    populate_table_from_csv(conn, "INSERT INTO solar_hours (location_id, tilt_angle, month, solar_hours) VALUES (?, ?, ?, ?)", config.SOLAR_HOURS_CSV_PATH)
+    populate_table_from_csv(conn, "INSERT INTO pdbt_rate (region_id, billing_period, transmission, distribution, cenace, supplier, services, energy, capacity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", config.PDBT_RATE_CSV_PATH)
+    
 def setup_database():
     os.makedirs(os.path.dirname(config.DATABASE_PATH), exist_ok=True)
     
     try:
         with sqlite3.connect(config.DATABASE_PATH) as conn:
-            # Create tables
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS locations (
-                    location_id INTEGER PRIMARY KEY,
-                    city TEXT NOT NULL,
-                    state TEXT NOT NULL
-                )''')
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS solar_hours (
-                    solar_hour_id INTEGER PRIMARY KEY,
-                    location_id INTEGER,
-                    tilt_angle INTEGER,
-                    month INTEGER,
-                    solar_hours REAL NOT NULL,
-                    FOREIGN KEY (location_id) REFERENCES locations (location_id)
-                )''')
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS pdbt_rate(
-                    rate_id INTEGER PRIMARY KEY,
-                    state TEXT NOT NULL,
-                    billing_period TEXT NOT NULL,
-                    transmission REAL,
-                    distribution REAL,
-                    cenace REAL,
-                    supplier REAL,
-                    services REAL,
-                    energy REAL,
-                    capacity REAL,
-                    UNIQUE(state, billing_period),
-                    CHECK (billing_period LIKE '____-__')
-                )''')
-
-            # Populate tables using the paths from the config module
-            populate_table_from_csv(conn, "INSERT INTO locations (city, state) VALUES (?, ?)", config.LOCATIONS_CSV_PATH)
-            populate_table_from_csv(conn, "INSERT INTO solar_hours (location_id, tilt_angle, month, solar_hours) VALUES (?, ?, ?, ?)", config.SOLAR_HOURS_CSV_PATH)
-            populate_table_from_csv(conn, "INSERT INTO pdbt_rate (state, billing_period, transmission, distribution, cenace, supplier, services, energy, capacity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", config.PDBT_RATE_CSV_PATH)
-            
+            create_tables(conn)
+            populate_tables(conn)
             conn.commit()
+    except sqlite3.OperationalError as e:
+        print(f"Operational error during database setup: {e}")
     except sqlite3.DatabaseError as e:
-        print(f"Database error: {e}")
+        print(f"Database error during setup: {e}")
     except Exception as e:
         print(f"An error occurred during setup: {e}")
 
