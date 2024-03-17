@@ -3,6 +3,75 @@ import csv
 import os
 import config
 
+def create_tables(conn):
+    try:
+        conn.execute('''
+        CREATE TABLE IF NOT EXISTS regions (
+            region_id INTEGER PRIMARY KEY,
+            region_name TEXT NOT NULL
+            )''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS locations (
+                location_id INTEGER PRIMARY KEY,
+                city TEXT NOT NULL,
+                region_id TEXT NOT NULL,
+                FOREIGN KEY (region_id) REFERENCES regions (region_id)
+            )''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS solar_hours (
+                solar_hour_id INTEGER PRIMARY KEY,
+                location_id INTEGER,
+                tilt_angle INTEGER,
+                month INTEGER,
+                solar_hours REAL NOT NULL,
+                FOREIGN KEY (location_id) REFERENCES locations (location_id)
+            )''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS residential_summer_rates(
+                    charge_id INTEGER PRIMARY KEY,                    
+                    rate TEXT NOT NULL,
+                    billing_period TEXT NOT NULL,
+                    basic REAL,
+                    low_intermediate REAL,
+                    high_intermediate REAL,
+                    excess REAL,
+                    UNIQUE(rate, billing_period),
+                    CHECK (billing_period LIKE '____-__')
+            )''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS residential_winter_rates(
+                    charge_id INTEGER PRIMARY KEY,
+                    rate TEXT NOT NULL,
+                    billing_period TEXT NOT NULL,
+                    basic REAL,
+                    intermediate REAL,
+                    excess REAL,
+                    UNIQUE(rate, billing_period),
+                    CHECK (billing_period LIKE '____-__')
+            )''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS pdbt_rate(
+                charge_id INTEGER PRIMARY KEY,
+                region_id INTEGER NOT NULL,
+                billing_period TEXT NOT NULL,
+                transmission REAL,
+                distribution REAL,
+                cenace REAL,
+                supplier REAL,
+                services REAL,
+                energy REAL,
+                capacity REAL,
+                UNIQUE(region_id, billing_period),
+                CHECK (billing_period LIKE '____-__'),
+                FOREIGN KEY (region_id) REFERENCES regions (region_id)
+            )''')
+    except sqlite3.OperationalError as e:
+        print(f"Operational error during table creation: {e}")
+    except sqlite3.DatabaseError as e:
+        print(f"Database error during table creation: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred during table creation: {e}")
+
 def execute_bulk_insert(conn, sql, data):
     try:
         with conn:
@@ -33,56 +102,12 @@ def populate_table_from_csv(conn, insert_sql, csv_file):
     except Exception as e:
         print(f"An unexpected error occurred during CSV processing: {e}")
 
-def create_tables(conn):
-    try:
-        conn.execute('''
-        CREATE TABLE IF NOT EXISTS regions (
-            region_id INTEGER PRIMARY KEY,
-            region_name TEXT NOT NULL
-        )''')
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS locations (
-                location_id INTEGER PRIMARY KEY,
-                city TEXT NOT NULL,
-                region_id TEXT NOT NULL,
-                FOREIGN KEY (region_id) REFERENCES regions (region_id)
-            )''')
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS solar_hours (
-                solar_hour_id INTEGER PRIMARY KEY,
-                location_id INTEGER,
-                tilt_angle INTEGER,
-                month INTEGER,
-                solar_hours REAL NOT NULL,
-                FOREIGN KEY (location_id) REFERENCES locations (location_id)
-            )''')
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS pdbt_rate(
-                rate_id INTEGER PRIMARY KEY,
-                region_id INTEGER NOT NULL,
-                billing_period TEXT NOT NULL,
-                transmission REAL,
-                distribution REAL,
-                cenace REAL,
-                supplier REAL,
-                services REAL,
-                energy REAL,
-                capacity REAL,
-                UNIQUE(region_id, billing_period),
-                CHECK (billing_period LIKE '____-__'),
-                FOREIGN KEY (region_id) REFERENCES regions (region_id)
-            )''')
-    except sqlite3.OperationalError as e:
-        print(f"Operational error during table creation: {e}")
-    except sqlite3.DatabaseError as e:
-        print(f"Database error during table creation: {e}")
-    except Exception as e:
-        print(f"An unexpected error occurred during table creation: {e}")
-
 def populate_tables(conn):
     populate_table_from_csv(conn, "INSERT INTO regions (region_name) VALUES(?)", config.REGIONS_CSV_PATH)
     populate_table_from_csv(conn, "INSERT INTO locations (city, region_id) VALUES (?, ?)", config.LOCATIONS_CSV_PATH)
     populate_table_from_csv(conn, "INSERT INTO solar_hours (location_id, tilt_angle, month, solar_hours) VALUES (?, ?, ?, ?)", config.SOLAR_HOURS_CSV_PATH)
+    populate_table_from_csv(conn, "INSERT INTO residential_summer_rates (rate, billing_period, basic, low_intermediate, high_intermediate, excess) VALUES(?, ?, ?, ?, ?, ?)", config.RESIDENTIAL_SUMMER_RATES_CSV_PATH)
+    populate_table_from_csv(conn, "INSERT INTO residential_winter_rates (rate, billing_period, basic, intermediate, excess) VALUES(?, ?, ?, ?, ?)", config.RESIDENTIAL_WINTER_RATES_CSV_PATH)
     populate_table_from_csv(conn, "INSERT INTO pdbt_rate (region_id, billing_period, transmission, distribution, cenace, supplier, services, energy, capacity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", config.PDBT_RATE_CSV_PATH)
     
 def setup_database():
