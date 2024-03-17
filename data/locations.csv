@@ -1,3 +1,3 @@
-city,region_id
-San Felipe,1
-Mexicali,1
+city,summer_start_month,region_id
+San Felipe,5,1
+Mexicali,5,1

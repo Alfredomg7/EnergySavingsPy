@@ -6,10 +6,10 @@ import config
 def create_tables(conn):
     try:
         conn.execute('''
-        CREATE TABLE IF NOT EXISTS regions (
-            region_id INTEGER PRIMARY KEY,
-            region_name TEXT NOT NULL
-            )''')
+            CREATE TABLE IF NOT EXISTS regions (
+                region_id INTEGER PRIMARY KEY,
+                region_name TEXT NOT NULL
+                )''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS locations (
                 location_id INTEGER PRIMARY KEY,
@@ -28,26 +28,26 @@ def create_tables(conn):
             )''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS residential_summer_rates(
-                    charge_id INTEGER PRIMARY KEY,                    
-                    rate TEXT NOT NULL,
-                    billing_period TEXT NOT NULL,
-                    basic REAL,
-                    low_intermediate REAL,
-                    high_intermediate REAL,
-                    excess REAL,
-                    UNIQUE(rate, billing_period),
-                    CHECK (billing_period LIKE '____-__')
+                charge_id INTEGER PRIMARY KEY,
+                rate TEXT NOT NULL,
+                billing_period TEXT NOT NULL,
+                basic REAL,
+                low_intermediate REAL,
+                high_intermediate REAL,
+                excess REAL,
+                UNIQUE(rate, billing_period),
+                CHECK (billing_period LIKE '____-__')
             )''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS residential_winter_rates(
-                    charge_id INTEGER PRIMARY KEY,
-                    rate TEXT NOT NULL,
-                    billing_period TEXT NOT NULL,
-                    basic REAL,
-                    intermediate REAL,
-                    excess REAL,
-                    UNIQUE(rate, billing_period),
-                    CHECK (billing_period LIKE '____-__')
+                charge_id INTEGER PRIMARY KEY,
+                rate TEXT NOT NULL,
+                billing_period TEXT NOT NULL,
+                basic REAL,
+                intermediate REAL,
+                excess REAL,
+                UNIQUE(rate, billing_period),
+                CHECK (billing_period LIKE '____-__')
             )''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS pdbt_rate(
