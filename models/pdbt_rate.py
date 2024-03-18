@@ -12,7 +12,10 @@ class PdbtRate(Rate):
         charges = self._validate_charges(charges)
         return charges
     
-    def _calculate_payment(self, charge, consumption):    
+    def _calculate_payment(self, charge, consumption):
+        if consumption == 0:
+            return charge["supplier"] * self.IVA_RATE
+        
         cost_components = [
             consumption * charge["transmission"],
             consumption * charge["distribution"],
