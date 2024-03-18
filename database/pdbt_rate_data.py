@@ -18,6 +18,7 @@ class PdbtRateData(PdbtRateDAO):
                     FROM pdbt_rate
                     WHERE region_id = ? 
                     AND billing_period BETWEEN ? AND ?
+                    ORDER BY SUBSTR(billing_period, 6, 7)
                 """
                 cursor.execute(query, (region_id, start_year_month, end_year_month))
                 result = cursor.fetchall()
