@@ -184,7 +184,7 @@ class SolarSavingsCalculator:
         year_1_consumption = sum(new_monthly_consumption)
         new_monthly_payment = self.calculate_new_monthly_payment()
         year_1_payment = round(sum(new_monthly_payment), 2)
-        year_1_fix_charge_payment = self.rate.fix_charge
+        year_1_fix_charge_payment = sum(self.rate.calculate_monthly_payments(0))
         annual_increase = 1 +  annual_inflation
         new_lifetime_payment = [year_1_payment]
         new_lifetime_consumption = self.calculate_new_lifetime_consumption()

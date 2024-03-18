@@ -36,8 +36,7 @@ class ResidentialRatesData(ResidentialRatesDAO):
                 cursor.execute(query, [rate] + year_months)
                 result = cursor.fetchall()
             if result:
-                col_headers = [col_header[0] for col_header in cursor.description]
-                return [dict(zip(col_headers, row)) for row in result]
+                return [dict(zip(columns, row)) for row in result]
             return None
         except sqlite3.Error as e:
             print(f"Database error: {e}")
@@ -45,7 +44,7 @@ class ResidentialRatesData(ResidentialRatesDAO):
 
     def get_summer_charges(self, rate, summer_start_month, start_year_month):
         year_months = self._generate_year_months(summer_start_month, start_year_month)
-        columns = ['basic', 'low_intermediate', 'high_intermediate', 'excess']
+        columns = ['billing_period', 'basic', 'low_intermediate', 'high_intermediate', 'excess']
         return self._retrieve_charges(rate, year_months, 'residential_summer_rates', columns)
 
     def get_winter_charges(self, rate, summer_start_month, start_year_month):
