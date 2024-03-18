@@ -7,7 +7,7 @@ class SolarHoursDAO(ABC):
 
 class PdbtRateDAO(ABC):
     @abstractmethod
-    def get_charges(self, region_id, start_month, end_month):
+    def get_charges(self, region_id, start_year_month, end_year_month):
         pass
 
 class ResidentialRatesDAO(ABC):

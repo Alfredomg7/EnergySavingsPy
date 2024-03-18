@@ -7,6 +7,8 @@ class Location:
         self._solar_hours_data = solar_hours_data or SolarHoursData()
         self._location_data = location_data or LocationData()
         self._region = self._location_data.get_region(self.name)
+        self._region_id = self._location_data.get_region_id(self.name)
+        self._summer_start_month = self._location_data.get_summer_start_month(self.name)
 
     @property
     def name(self):
@@ -15,6 +17,14 @@ class Location:
     @property
     def region(self):
         return self._region
+    
+    @property
+    def region_id(self):
+        return self._region_id
+    
+    @property
+    def summer_start_month(self):
+        return self._summer_start_month
     
     def get_solar_hours(self, tilt):
         solar_hours = self._solar_hours_data.get_solar_hours(self._name, tilt)

@@ -3,20 +3,37 @@ from models.location import Location
 
 class TestLocation(unittest.TestCase):
     def setUp(self):
-        self.test_city = 'Mexicali'
+        self.valid_city = 'Mexicali'
         self.invalid_city = 'Atlantis'
-        self.location = Location(self.test_city)
+        self.valid_location = Location(self.valid_city)
+        self.invalid_location = Location(self.invalid_city)
 
     def test_get_region(self):
-        # Testing with a valid city
-        region = self.location.region
-        self.assertIsNotNone(region, f"Region should exist for {self.test_city}")
-        self.assertIsInstance(region, str, f"Expected region to be a string for {self.test_city}")
+        region = self.valid_location.region
+        self.assertIsNotNone(region)
+        self.assertIsInstance(region, str)
+        self.assertEqual(region,'Baja California')
 
-        # Testing with an invalid city
-        invalid_location = Location(self.invalid_city)
-        region = invalid_location.region
-        self.assertIsNone(region, f"Region should be None for an invalid city like {self.invalid_city}")
+        region = self.invalid_location.region
+        self.assertIsNone(region)
 
+    def test_get_region_id(self):
+        region_id = self.valid_location.region_id
+        self.assertIsNotNone(region_id)
+        self.assertIsInstance(region_id, str)
+        self.assertEqual(region_id, '1')
+
+        region_id = self.invalid_location.region
+        self.assertIsNone(region_id)
+
+    def test_get_summer_start_month(self):
+        summer_start_month = self.valid_location.summer_start_month
+        self.assertIsNotNone(summer_start_month)
+        self.assertIsInstance(summer_start_month, int)
+        self.assertEqual(summer_start_month, 5)
+
+        summer_start_month = self.invalid_location.summer_start_month
+        self.assertIsNone(summer_start_month)
+        
 if __name__ == '__main__':
     unittest.main()

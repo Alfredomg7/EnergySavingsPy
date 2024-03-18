@@ -8,7 +8,7 @@ class TestPdbtRateData(unittest.TestCase):
         self.start_month = '2022-01'
         self.end_month = '2022-12'
         self.pdbt_rate_data = PdbtRateData(db_path)
-        self.test_data = [1]
+        self.test_data = ['1']
     
     def test_get_charges(self):
         for region_id in self.test_data:
