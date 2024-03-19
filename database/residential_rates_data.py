@@ -1,6 +1,7 @@
 import sqlite3
 from database.dao_interface import ResidentialRatesDAO
 from utils.date_utils import calculate_start_month, extract_month, extract_year, format_month
+from datetime import datetime
 import config
 
 class ResidentialRatesData(ResidentialRatesDAO):
@@ -40,12 +41,24 @@ class ResidentialRatesData(ResidentialRatesDAO):
             print(f"Database error: {e}")
             return None
 
-    def get_summer_charges(self, rate, summer_months, end_year_month):
+    def _get_summer_charges(self, rate, summer_months, end_year_month):
         year_months = self._generate_year_months(summer_months, end_year_month)
         columns = ['billing_period', 'basic', 'low_intermediate', 'high_intermediate', 'excess']
         return self._retrieve_charges(rate, year_months, 'residential_summer_rates', columns)
 
-    def get_winter_charges(self, rate, winter_months, end_year_month):
+    def _get_winter_charges(self, rate, winter_months, end_year_month):
         year_months = self._generate_year_months(winter_months, end_year_month)
-        columns = ['basic', 'intermediate', 'excess']
+        columns = ['billing_period', 'basic', 'intermediate', 'excess']
         return self._retrieve_charges(rate, year_months, 'residential_winter_rates', columns)
+
+    def get_charges(self, rate, summer_months, winter_months, end_year_month):
+        summer_charges = self._get_summer_charges(rate, summer_months, end_year_month)
+        winter_charges = self._get_winter_charges(rate, winter_months, end_year_month)
+
+        summer_start_month = summer_months[0]
+        winter_start_charges = [charge for charge in winter_charges if extract_month(charge['billing_period']) < summer_start_month]
+        winter_end_charges = [charge for charge in winter_charges if extract_month(charge['billing_period']) > summer_start_month]
+        
+        all_charges = winter_start_charges + summer_charges + winter_end_charges
+
+        return all_charges
