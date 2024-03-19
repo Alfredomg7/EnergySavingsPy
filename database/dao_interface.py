@@ -12,11 +12,10 @@ class PdbtRateDAO(ABC):
 
 class ResidentialRatesDAO(ABC):
     @abstractmethod
-    def get_summer_charges(self, rate, summer_start_month, start_year_month):
+    def get_summer_charges(self, rate, summer_months, end_year_month):
         pass
 
-    @abstractmethod
-    def get_winter_charges(self, rate, summer_start_month, start_year_month):
+    def get_winter_charges(self, rate, winter_months, end_year_month):
         pass
     
 class LocationDAO(ABC):
@@ -26,4 +25,8 @@ class LocationDAO(ABC):
 
     @abstractmethod
     def get_region_id(self, location_name):
+        pass
+
+    @abstractmethod
+    def get_summer_start_month(self, location_name):
         pass

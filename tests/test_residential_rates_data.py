@@ -8,12 +8,13 @@ class TestResidentialRatesData(unittest.TestCase):
         self.db_path = config.DATABASE_PATH
         self.residential_rates_data = ResidentialRatesData(self.db_path)
         self.test_rate = '1F'
-        self.summer_start_month = 5
-        self.start_year_month = '2024-01'
+        self.summer_months = [5, 6, 7, 8, 9, 10]
+        self.winter_months = [11, 12, 1, 2, 3, 4]
+        self.end_year_month = '2024-12'
 
     def test_get_summer_charges(self):
         charges = self.residential_rates_data.get_summer_charges(
-            self.test_rate, self.summer_start_month, self.start_year_month
+            self.test_rate, self.summer_months, self.end_year_month
         )
         self.assertIsNotNone(charges)
         self.assertIsInstance(charges, list)
@@ -22,7 +23,7 @@ class TestResidentialRatesData(unittest.TestCase):
 
     def test_get_winter_charges(self):
         charges = self.residential_rates_data.get_winter_charges(
-            self.test_rate, self.summer_start_month, self.start_year_month
+            self.test_rate, self.winter_months, self.end_year_month
         )
         self.assertIsNotNone(charges)
         self.assertIsInstance(charges, list)

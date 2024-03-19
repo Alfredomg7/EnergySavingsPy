@@ -1,5 +1,5 @@
 import unittest
-from utils.date_utils import calculate_start_month, format_month, extract_month, extract_year
+from utils.date_utils import *
 
 class TestDateUtils(unittest.TestCase):
 
@@ -19,13 +19,25 @@ class TestDateUtils(unittest.TestCase):
         self.assertEqual(extract_month('2023-03'), 3)
         self.assertEqual(extract_month('2023-10'), 10)
         with self.assertRaises(ValueError):
-            self.assertIsNone(extract_month('2023-May'))
+            extract_month('2023-May')
 
     def test_extract_year(self):
         self.assertEqual(extract_year('2023-09'), 2023)
         self.assertEqual(extract_year('2021-11'), 2021)
         with self.assertRaises(ValueError):
-            self.assertIsNone(extract_year('2021-Feb'))
+            extract_year('2021-Feb')
+
+    def test_generate_months(self):
+        self.assertEqual(generate_months(1), [1, 2, 3, 4, 5, 6])
+        self.assertEqual(generate_months(9), [9, 10, 11, 12, 1, 2])
+        with self.assertRaises(TypeError):
+            generate_months('6')
+    
+    def test_get_winter_start_month(self):
+        self.assertEqual(get_winter_start_month(1), 7)
+        self.assertEqual(get_winter_start_month(9), 3)
+        with self.assertRaises(TypeError):
+            get_winter_start_month('7')
 
 if __name__ == '__main__':
     unittest.main()

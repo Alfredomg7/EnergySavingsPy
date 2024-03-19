@@ -20,3 +20,20 @@ def extract_year(year_month):
     year_datetime = datetime.strptime(year_month, '%Y-%m')
     year = year_datetime.year
     return year
+
+def generate_months(start_month):
+    # Summer/Winter charges applies during 6 months
+    season_duration = 6
+    months = []
+    
+    for i in range(season_duration):
+        month = (start_month + i) % 12 or 12 # Handles the case when the month is 12 (december) or greater
+        months.append(month)
+    
+    return months
+
+def get_winter_start_month(summer_start_month):
+    season_duration = 6
+    # Winter season start the next month after the summer season ends
+    winter_start_month = (summer_start_month + season_duration) % 12 or 12
+    return winter_start_month

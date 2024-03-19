@@ -1,21 +1,19 @@
 import sqlite3
 from database.dao_interface import ResidentialRatesDAO
-from utils.date_utils import extract_month, extract_year, format_month
+from utils.date_utils import calculate_start_month, extract_month, extract_year, format_month
 import config
 
 class ResidentialRatesData(ResidentialRatesDAO):
-    SEASON_DURATION = 6
-
     def __init__(self, db_path=config.DATABASE_PATH):
         self.db_path = db_path
 
-    def _generate_year_months(self, season_start_month, start_year_month):
+    def _generate_year_months(self, season_months, end_year_month):
+        start_year_month = calculate_start_month(end_year_month)
         year_months = []
         start_year = extract_year(start_year_month)
         start_month = extract_month(start_year_month)
 
-        for i in range(self.SEASON_DURATION):
-            month = (season_start_month + i) % 12 or 12
+        for month in season_months:
             year = start_year if month >= start_month else start_year + 1
             year_month = format_month(year, month)
             year_months.append(year_month)
@@ -42,13 +40,12 @@ class ResidentialRatesData(ResidentialRatesDAO):
             print(f"Database error: {e}")
             return None
 
-    def get_summer_charges(self, rate, summer_start_month, start_year_month):
-        year_months = self._generate_year_months(summer_start_month, start_year_month)
+    def get_summer_charges(self, rate, summer_months, end_year_month):
+        year_months = self._generate_year_months(summer_months, end_year_month)
         columns = ['billing_period', 'basic', 'low_intermediate', 'high_intermediate', 'excess']
         return self._retrieve_charges(rate, year_months, 'residential_summer_rates', columns)
 
-    def get_winter_charges(self, rate, summer_start_month, start_year_month):
-        winter_start_month = (summer_start_month + self.SEASON_DURATION) % 12 or 12
-        year_months = self._generate_year_months(winter_start_month, start_year_month)
+    def get_winter_charges(self, rate, winter_months, end_year_month):
+        year_months = self._generate_year_months(winter_months, end_year_month)
         columns = ['basic', 'intermediate', 'excess']
         return self._retrieve_charges(rate, year_months, 'residential_winter_rates', columns)
