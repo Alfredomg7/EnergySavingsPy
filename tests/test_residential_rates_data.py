@@ -12,7 +12,7 @@ class TestResidentialRatesData(unittest.TestCase):
         self.winter_months = [11, 12, 1, 2, 3, 4]
         self.end_year_month = '2024-12'
 
-    def _test_get_summer_charges(self):
+    def test_get_summer_charges(self):
         charges = self.residential_rates_data._get_summer_charges(
             self.test_rate, self.summer_months, self.end_year_month
         )
@@ -21,7 +21,7 @@ class TestResidentialRatesData(unittest.TestCase):
         self.assertEqual(len(charges), 6)
         self.assertTrue(all(isinstance(charge, dict) for charge in charges))
 
-    def _test_get_winter_charges(self):
+    def test_get_winter_charges(self):
         charges = self.residential_rates_data._get_winter_charges(
             self.test_rate, self.winter_months, self.end_year_month
         )

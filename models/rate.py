@@ -1,8 +1,7 @@
 class Rate:
     IVA_RATE = 1.08
 
-    def __init__(self, region_id, end_year_month):
-        self._region_id = region_id
+    def __init__(self, end_year_month):
         self._end_year_month = end_year_month
         self._charges = None
 

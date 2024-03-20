@@ -3,7 +3,8 @@ from models.rate import Rate
 
 class PdbtRate(Rate):
     def __init__(self, region_id, end_year_month, pdbt_rate_data=None):
-        super().__init__(region_id, end_year_month)
+        self._region_id = region_id
+        super().__init__(end_year_month)
         self._pdbt_rate_data = pdbt_rate_data or PdbtRateData()
         self._charges = self._get_charges()
 
