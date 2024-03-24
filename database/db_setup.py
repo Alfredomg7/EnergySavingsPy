@@ -14,6 +14,7 @@ def create_tables(conn):
             CREATE TABLE IF NOT EXISTS locations (
                 location_id INTEGER PRIMARY KEY,
                 city TEXT NOT NULL,
+                residential_rate TEXT NOT NULL,
                 summer_start_month INTEGER NOT NULL,
                 region_id TEXT NOT NULL,
                 FOREIGN KEY (region_id) REFERENCES regions (region_id)
@@ -105,7 +106,7 @@ def populate_table_from_csv(conn, insert_sql, csv_file):
 
 def populate_tables(conn):
     populate_table_from_csv(conn, "INSERT INTO regions (region_name) VALUES(?)", config.REGIONS_CSV_PATH)
-    populate_table_from_csv(conn, "INSERT INTO locations (city, summer_start_month, region_id) VALUES (?, ?, ?)", config.LOCATIONS_CSV_PATH)
+    populate_table_from_csv(conn, "INSERT INTO locations (city, residential_rate, summer_start_month, region_id) VALUES (?, ?, ?, ?)", config.LOCATIONS_CSV_PATH)
     populate_table_from_csv(conn, "INSERT INTO solar_hours (location_id, tilt_angle, month, solar_hours) VALUES (?, ?, ?, ?)", config.SOLAR_HOURS_CSV_PATH)
     populate_table_from_csv(conn, "INSERT INTO residential_summer_rates (rate, billing_period, basic, low_intermediate, high_intermediate, excess) VALUES(?, ?, ?, ?, ?, ?)", config.RESIDENTIAL_SUMMER_RATES_CSV_PATH)
     populate_table_from_csv(conn, "INSERT INTO residential_winter_rates (rate, billing_period, basic, intermediate, excess) VALUES(?, ?, ?, ?, ?)", config.RESIDENTIAL_WINTER_RATES_CSV_PATH)

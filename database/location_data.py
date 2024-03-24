@@ -40,6 +40,22 @@ class LocationData(LocationDAO):
             print(f"Database error: {e}")
             return None
     
+    def get_residential_rate(self, city):
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                query = """
+                    SELECT residential_rate
+                    FROM locations
+                    WHERE city = ? 
+                """
+                cursor.execute(query, (city,))
+                result = cursor.fetchone()
+                return result[0] if result else None
+        except sqlite3.Error as e:
+            print(f"Database error: {e}")
+            return None
+        
     def get_summer_start_month(self, city):
         try:
             with sqlite3.connect(self.db_path) as conn:

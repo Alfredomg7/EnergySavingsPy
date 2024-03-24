@@ -26,6 +26,12 @@ class TestLocation(unittest.TestCase):
         region_id = self.invalid_location.region
         self.assertIsNone(region_id)
 
+    def test_get_residential_rate(self):
+        residential_rate = self.valid_location.residential_rate
+        self.assertIsNotNone(residential_rate)
+        self.assertIsInstance(residential_rate, str)
+        self.assertEqual(residential_rate, '1F')
+
     def test_get_summer_start_month(self):
         summer_start_month = self.valid_location.summer_start_month
         self.assertIsNotNone(summer_start_month)

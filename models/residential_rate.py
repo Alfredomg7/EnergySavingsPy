@@ -16,25 +16,15 @@ class ResidentialRate(Rate):
                                   '1E': {'basic': 75, 'intermediate': 200},
                                   '1F': {'basic': 75, 'intermediate': 200}}
     
-    def __init__(self, rate, end_year_month, summer_start_month, residential_rates_data=None):
-        self._rate = self._validate_rate(rate)
-        super().__init__(end_year_month)
-        self._summer_start_month = self._validate_summer_start_month(summer_start_month)
+    def __init__(self, location, end_year_month, residential_rates_data=None):
+        super().__init__(location, end_year_month)
+        self._rate = self._location.residential_rate
+        self._summer_start_month = self._validate_summer_start_month(self._location.summer_start_month)
         self._summer_months = generate_months(self._summer_start_month)
         self._winter_start_month = get_winter_start_month(self._summer_start_month)
-        self._winter_months = generate_months(get_winter_start_month(self._winter_start_month))
+        self._winter_months = generate_months(self._winter_start_month)
         self._residential_rates_data = residential_rates_data or ResidentialRatesData()
         self._charges = self._get_charges()
-
-    def _validate_rate(self, value):
-        if not isinstance(value, str):
-            raise ValueError("Rate must be a string")
-        
-        residential_rates = ['1C', '1D', '1E', '1F']
-        if value not in residential_rates:
-            raise ValueError(f"Rate must be one of the following: {residential_rates}")
-    
-        return value
     
     def _validate_summer_start_month(self, value):
         if not isinstance(value, int):

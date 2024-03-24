@@ -1,9 +1,17 @@
+from models.location import Location
+
 class Rate:
     IVA_RATE = 1.08
 
-    def __init__(self, end_year_month):
+    def __init__(self, location, end_year_month):
+        self._location = self._validate_location(location)
         self._end_year_month = end_year_month
         self._charges = None
+
+    def _validate_location(self, value):
+        if not isinstance(value, Location):
+            raise ValueError("The location object must be an instance of Location")
+        return value
 
     def _validate_charges(self, value):
         if not value:

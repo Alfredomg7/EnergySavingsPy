@@ -2,14 +2,13 @@ from database.pdbt_rate_data import PdbtRateData
 from models.rate import Rate
 
 class PdbtRate(Rate):
-    def __init__(self, region_id, end_year_month, pdbt_rate_data=None):
-        self._region_id = region_id
-        super().__init__(end_year_month)
+    def __init__(self, location, end_year_month, pdbt_rate_data=None):
+        super().__init__(location, end_year_month)
         self._pdbt_rate_data = pdbt_rate_data or PdbtRateData()
         self._charges = self._get_charges()
 
     def _get_charges(self):
-        charges = self._pdbt_rate_data.get_charges(self._region_id, self._end_year_month)
+        charges = self._pdbt_rate_data.get_charges(self._location.region_id, self._end_year_month)
         charges = self._validate_charges(charges)
         return charges
     

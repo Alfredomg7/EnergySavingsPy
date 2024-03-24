@@ -8,6 +8,7 @@ class Location:
         self._location_data = location_data or LocationData()
         self._region = self._location_data.get_region(self.name)
         self._region_id = self._location_data.get_region_id(self.name)
+        self._residential_rate = self._location_data.get_residential_rate(self.name)
         self._summer_start_month = self._location_data.get_summer_start_month(self.name)
 
     @property
@@ -21,6 +22,10 @@ class Location:
     @property
     def region_id(self):
         return self._region_id
+    
+    @property
+    def residential_rate(self):
+        return self._residential_rate
     
     @property
     def summer_start_month(self):
