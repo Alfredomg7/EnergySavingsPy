@@ -5,9 +5,9 @@ class SolarHoursDAO(ABC):
     def get_solar_hours(self, location_name, tilt):
         pass
 
-class PdbtRateDAO(ABC):
+class CommercialRatesDAO(ABC):
     @abstractmethod
-    def get_charges(self, region_id, end_year_month):
+    def get_charges(self, region_id, rate, end_year_month):
         pass
 
 class ResidentialRatesDAO(ABC):

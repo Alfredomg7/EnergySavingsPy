@@ -9,7 +9,7 @@ def create_tables(conn):
             CREATE TABLE IF NOT EXISTS regions (
                 region_id INTEGER PRIMARY KEY,
                 region_name TEXT NOT NULL
-                )''')
+            )''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS locations (
                 location_id INTEGER PRIMARY KEY,
@@ -52,9 +52,10 @@ def create_tables(conn):
                 CHECK (billing_period LIKE '____-__')
             )''')
         conn.execute('''
-            CREATE TABLE IF NOT EXISTS pdbt_rate(
+            CREATE TABLE IF NOT EXISTS commercial_rates(
                 charge_id INTEGER PRIMARY KEY,
                 region_id INTEGER NOT NULL,
+                rate TEXT NOT NULL,
                 billing_period TEXT NOT NULL,
                 transmission REAL,
                 distribution REAL,
@@ -63,7 +64,7 @@ def create_tables(conn):
                 services REAL,
                 energy REAL,
                 capacity REAL,
-                UNIQUE(region_id, billing_period),
+                UNIQUE(region_id, rate, billing_period),
                 CHECK (billing_period LIKE '____-__'),
                 FOREIGN KEY (region_id) REFERENCES regions (region_id)
             )''')
@@ -110,7 +111,7 @@ def populate_tables(conn):
     populate_table_from_csv(conn, "INSERT INTO solar_hours (location_id, tilt_angle, month, solar_hours) VALUES (?, ?, ?, ?)", config.SOLAR_HOURS_CSV_PATH)
     populate_table_from_csv(conn, "INSERT INTO residential_summer_rates (rate, billing_period, basic, low_intermediate, high_intermediate, excess) VALUES(?, ?, ?, ?, ?, ?)", config.RESIDENTIAL_SUMMER_RATES_CSV_PATH)
     populate_table_from_csv(conn, "INSERT INTO residential_winter_rates (rate, billing_period, basic, intermediate, excess) VALUES(?, ?, ?, ?, ?)", config.RESIDENTIAL_WINTER_RATES_CSV_PATH)
-    populate_table_from_csv(conn, "INSERT INTO pdbt_rate (region_id, billing_period, transmission, distribution, cenace, supplier, services, energy, capacity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", config.PDBT_RATE_CSV_PATH)
+    populate_table_from_csv(conn, "INSERT INTO commercial_rates (region_id, rate, billing_period, transmission, distribution, cenace, supplier, services, energy, capacity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", config.COMMERCIAL_RATES_CSV_PATH)
     
 def setup_database():
     os.makedirs(os.path.dirname(config.DATABASE_PATH), exist_ok=True)

@@ -13,7 +13,7 @@ class TestPdbtRate(unittest.TestCase):
                             'supplier': 100, 'services': 0.02, 'energy': 0.07, 'capacity': 0.03} for _ in range(12)]
 
     def test_calculate_monthly_payments(self):
-        with patch('models.pdbt_rate.PdbtRateData.get_charges', return_value=self.mock_charges):
+        with patch('models.pdbt_rate.CommercialRatesData.get_charges', return_value=self.mock_charges):
             pdbt_rate = PdbtRate(self.location, self.end_month)
             start = 100
             step = 50

@@ -5,3 +5,4 @@ venv/
 *.db
 *.sqlite
 *sqlite3
+example.py

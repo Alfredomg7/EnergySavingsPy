@@ -1,10 +1,11 @@
 import sqlite3
-from database.dao_interface import PdbtRateDAO
+from database.dao_interface import CommercialRatesDAO
 from utils.date_utils import calculate_start_month
 import config
 
-class PdbtRateData(PdbtRateDAO):
-    def __init__(self, db_path=config.DATABASE_PATH):
+class CommercialRatesData(CommercialRatesDAO):
+    def __init__(self, rate, db_path=config.DATABASE_PATH):
+        self.rate = rate
         self.db_path = db_path
 
     def get_charges(self, region_id, end_year_month):
@@ -15,12 +16,12 @@ class PdbtRateData(PdbtRateDAO):
                 cursor = conn.cursor()
                 query = f"""
                     SELECT {','.join(columns)}
-                    FROM pdbt_rate
-                    WHERE region_id = ? 
+                    FROM commercial_rates
+                    WHERE region_id = ? AND rate = ?
                     AND billing_period BETWEEN ? AND ?
                     ORDER BY SUBSTR(billing_period, 6, 7)
                 """
-                cursor.execute(query, (region_id, start_year_month, end_year_month))
+                cursor.execute(query, (region_id, self.rate, start_year_month, end_year_month))
                 result = cursor.fetchall()
             if result:
                 return [dict(zip(columns, row)) for row in result]
