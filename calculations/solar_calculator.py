@@ -66,7 +66,7 @@ class SolarSavingsCalculator:
             return self._offset_cache
         
         current_annual_consumption = sum(self._current_monthly_consumption)
-        annual_energy_production = sum(self._pv_system.calculate_monthly_energy_production())
+        annual_energy_production = sum(self._pv_system.calculate_monthly_energy_production(self._rate._end_year_month))
         
         if current_annual_consumption == 0:
             return 1
@@ -81,7 +81,7 @@ class SolarSavingsCalculator:
         if self._new_monthly_consumption_cache is not None:
             return self._new_monthly_consumption_cache
         
-        monthly_production = self._pv_system.calculate_monthly_energy_production()
+        monthly_production = self._pv_system.calculate_monthly_energy_production(self._rate._end_year_month)
         new_monthly_consumption = []
         energy_bank = 0
 
@@ -119,7 +119,7 @@ class SolarSavingsCalculator:
         if self._new_lifetime_consumption_cache is not None:
             return self._new_lifetime_consumption_cache
         
-        lifetime_production = self._pv_system.calculate_lifetime_production()
+        lifetime_production = self._pv_system.calculate_lifetime_production(self._rate._end_year_month)
         annual_consumption = sum(self._current_monthly_consumption)
         new_lifetime_consumption = []
         offset = self.calculate_offset()

@@ -8,6 +8,7 @@ class TestSolarSavingsCalculator(unittest.TestCase):
     def setUp(self):
         self.mock_pv_system = Mock(spec=PVSystem)
         self.mock_rate = Mock(spec=Rate)
+        self.mock_rate._end_year_month = '2023-12'
         start = 100
         step = 10
         self.months = 12

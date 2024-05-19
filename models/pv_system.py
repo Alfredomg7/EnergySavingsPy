@@ -1,5 +1,6 @@
 from models.pv_module import PVModule
 from models.location import Location
+from utils.date_utils import generate_days_in_month
 
 class PVSystem:
     def __init__(self, pv_module, pv_module_count, efficiency, location):
@@ -96,13 +97,13 @@ class PVSystem:
         self._installation_cost_cache = installation_cost
         return installation_cost
     
-    def calculate_monthly_energy_production(self):
+    def calculate_monthly_energy_production(self, end_year_month):
         if self._monthly_energy_production_cache is not None:
             return self._monthly_energy_production_cache
         
         annual_production = []
         solar_hours = self._location.get_solar_hours(self._pv_module.tilt_angle)
-        days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        days_in_month = generate_days_in_month(end_year_month)
         
         if solar_hours:
             for month, hours in enumerate(solar_hours):
@@ -113,11 +114,11 @@ class PVSystem:
         self._monthly_energy_production_cache = annual_production
         return annual_production 
     
-    def calculate_lifetime_production(self):
+    def calculate_lifetime_production(self, end_year_month):
         if self._lifetime_production_cache is not None:
             return self._lifetime_production_cache
         
-        annual_production = sum(self.calculate_monthly_energy_production())
+        annual_production = sum(self.calculate_monthly_energy_production(end_year_month))
         degradation_factor = 1 - self._pv_module.annual_degradation
         lifetime_production = [round((annual_production * (degradation_factor ** year)), 2) for year in range(self._pv_module.lifespan)]
         
