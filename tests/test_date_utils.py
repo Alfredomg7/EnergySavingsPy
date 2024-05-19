@@ -38,6 +38,12 @@ class TestDateUtils(unittest.TestCase):
         self.assertEqual(get_winter_start_month(9), 3)
         with self.assertRaises(TypeError):
             get_winter_start_month('7')
-
+    
+    def test_generate_days_in_month(self):
+        self.assertEqual(generate_days_in_month(6, 2022), [30, 31, 31, 30, 31, 30, 31, 31, 28, 31, 30, 31])
+        self.assertEqual(generate_days_in_month(1, 2024), [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31])
+        with self.assertRaises(TypeError):
+            generate_days_in_month('6', '2022')
+            
 if __name__ == '__main__':
     unittest.main()

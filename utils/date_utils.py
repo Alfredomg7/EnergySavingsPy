@@ -1,5 +1,6 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from calendar import monthrange
 
 def calculate_start_month(end_month):
     end_month_datetime = datetime.strptime(end_month, '%Y-%m')
@@ -37,3 +38,11 @@ def get_winter_start_month(summer_start_month):
     # Winter season start the next month after the summer season ends
     winter_start_month = (summer_start_month + season_duration) % 12 or 12
     return winter_start_month
+
+def generate_days_in_month(start_month, start_year):
+    days_in_month = []
+    for i in range(start_month, start_month + 12):
+        month = (i - 1) % 12 + 1
+        year = start_year + (i - 1) // 12
+        days_in_month.append(monthrange(year, month)[1])
+    return days_in_month
