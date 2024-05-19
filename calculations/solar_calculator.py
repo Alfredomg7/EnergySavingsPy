@@ -1,12 +1,14 @@
 from models.pv_system import PVSystem
 from models.rate import Rate
+from models.gdmto_rate import GdmtoRate
 from calculations.environmental_impact_calculator import EnvironmentalImpactCalculator
 
 class SolarSavingsCalculator:
-    def __init__(self, rate, pv_system, current_monthly_consumption):
+    def __init__(self, rate, pv_system, current_monthly_consumption, **kwargs):
         self._rate = self._validate_rate(rate)
         self._pv_system = self._validate_pv_system(pv_system)
         self._current_monthly_consumption = current_monthly_consumption
+        self._extra_params = kwargs if isinstance(rate, GdmtoRate) else {}
         self._invalidate_caches()
 
     def _validate_rate(self, value):
@@ -155,7 +157,7 @@ class SolarSavingsCalculator:
         if self._current_monthly_payment_cache is not None:
             return self._current_monthly_payment_cache
         
-        current_monthly_payment = self.rate.calculate_monthly_payments(self.current_monthly_consumption)
+        current_monthly_payment = self.rate.calculate_monthly_payments(self.current_monthly_consumption, **self._extra_params)
         
         self._current_monthly_payment_cache = current_monthly_payment
         return current_monthly_payment
@@ -165,7 +167,7 @@ class SolarSavingsCalculator:
             return self._new_monthly_payment_cache
         
         new_monthly_consumption = self.calculate_new_monthly_consumption()
-        new_monthly_payment = self.rate.calculate_monthly_payments(new_monthly_consumption)
+        new_monthly_payment = self.rate.calculate_monthly_payments(new_monthly_consumption, **self._extra_params)
         
         self._calculate_new_monthly_payment = new_monthly_payment
         return new_monthly_payment
@@ -184,7 +186,7 @@ class SolarSavingsCalculator:
         year_1_consumption = sum(new_monthly_consumption)
         new_monthly_payment = self.calculate_new_monthly_payment()
         year_1_payment = round(sum(new_monthly_payment), 2)
-        year_1_fix_charge_payment = sum(self.rate.calculate_monthly_payments(0))
+        year_1_fix_charge_payment = sum(self.rate.calculate_monthly_payments(0, **self._extra_params))
         annual_increase = 1 +  annual_inflation
         new_lifetime_payment = [year_1_payment]
         new_lifetime_consumption = self.calculate_new_lifetime_consumption()

@@ -39,7 +39,10 @@ def get_winter_start_month(summer_start_month):
     winter_start_month = (summer_start_month + season_duration) % 12 or 12
     return winter_start_month
 
-def generate_days_in_month(start_month, start_year):
+def generate_days_in_month(end_year_month):
+    start_year_month = calculate_start_month(end_year_month)
+    start_month = extract_month(start_year_month)
+    start_year = extract_year(start_year_month)
     days_in_month = []
     for i in range(start_month, start_month + 12):
         month = (i - 1) % 12 + 1
