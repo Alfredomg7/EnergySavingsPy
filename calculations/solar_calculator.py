@@ -126,10 +126,10 @@ class SolarSavingsCalculator:
         
         if offset < 1:
             for production in lifetime_production:
-                new_lifetime_consumption = [annual_consumption - production for production in lifetime_production]
+                new_lifetime_consumption = [round(annual_consumption - production, 2) for production in lifetime_production]
         else:
             for production in lifetime_production:
-                new_consumption = annual_consumption - production 
+                new_consumption = round(annual_consumption - production, 2) 
                 new_lifetime_consumption.append(max(new_consumption, 0))
 
         self._new_lifetime_consumption_cache = new_lifetime_consumption
@@ -186,7 +186,7 @@ class SolarSavingsCalculator:
         year_1_consumption = sum(new_monthly_consumption)
         new_monthly_payment = self.calculate_new_monthly_payment()
         year_1_payment = round(sum(new_monthly_payment), 2)
-        year_1_fix_charge_payment = sum(self.rate.calculate_monthly_payments(0, **self._extra_params))
+        year_1_fix_charge_payment = sum(self.rate.calculate_monthly_payments([0 for _ in range(12)], **self._extra_params))
         annual_increase = 1 +  annual_inflation
         new_lifetime_payment = [year_1_payment]
         new_lifetime_consumption = self.calculate_new_lifetime_consumption()
@@ -208,9 +208,8 @@ class SolarSavingsCalculator:
         
         monthly_current_payment = self.calculate_current_monthly_payment()
         new_lifetime_payments = self.calculate_new_lifetime_payments(annual_inflation)
-        current_lifetime_payments = [round(sum(monthly_current_payment) * (1 + annual_inflation) ** i, 2) for i in range(len(new_lifetime_payments))]
-        total_payments_savings = [current - new for current, new in zip(current_lifetime_payments, new_lifetime_payments)]
-        
+        current_lifetime_payments = [sum(monthly_current_payment) * (1 + annual_inflation) ** i for i in range(len(new_lifetime_payments))]
+        total_payments_savings = [round(current - new, 2) for current, new in zip(current_lifetime_payments, new_lifetime_payments)]
         self._yearly_payments_savings_cache = total_payments_savings
         return total_payments_savings
     
@@ -232,8 +231,11 @@ class SolarSavingsCalculator:
             self._yearly_cashflow_cache = yearly_cash_flows
             return yearly_cash_flows
         
-        cumulative_cash_flows = [sum(yearly_cash_flows[:i+1]) for i in range(len(yearly_cash_flows))]
-        
+        cumulative_cash_flows = []
+        cumulative_sum = 0
+        for cash_flow in yearly_cash_flows:
+            cumulative_sum += cash_flow
+            cumulative_cash_flows.append(round(cumulative_sum, 2))
         self._cumulative_cashflow_cache = cumulative_cash_flows
         return cumulative_cash_flows      
 
@@ -241,7 +243,8 @@ class SolarSavingsCalculator:
         cash_flows = self.calculate_cash_flow()
         total_investment = -cash_flows[0]
         total_returns = sum(cash_flows[1:])
-        return round((total_returns - total_investment) /  total_investment, 2)
+        roi = (total_returns - total_investment) / total_investment  
+        return round(roi, 2)
     
     def calculate_payback_period(self):
         cumulative_cash_flows = self.calculate_cash_flow(cumulative=True)
@@ -261,7 +264,7 @@ class SolarSavingsCalculator:
         fractional_year = -last_negative_cashflow / (first_positive_cashflow - last_negative_cashflow)
         payback_period = last_negative_cashflow_year + fractional_year
 
-        return payback_period
+        return round(payback_period, 2)
     
     def calculate_environmental_impact(self):
         total_energy_savings = sum(self.calculate_yearly_energy_savings())
