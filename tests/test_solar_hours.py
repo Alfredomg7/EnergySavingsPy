@@ -10,7 +10,8 @@ class TestSolarHours(unittest.TestCase):
 
         self.test_data = {
             'Mexicali': [17, 32, 47],
-            'San Felipe': [16, 31, 46]
+            'San Felipe': [16, 31, 46],
+            'Tijuana': [17, 32, 47]
         }
     
     def test_solar_hours(self):

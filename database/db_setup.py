@@ -29,7 +29,18 @@ def create_tables(conn):
                 FOREIGN KEY (location_id) REFERENCES locations (location_id)
             )''')
         conn.execute('''
-            CREATE TABLE IF NOT EXISTS residential_summer_rates(
+            CREATE TABLE IF NOT EXISTS residential_summer_rates_a(
+                charge_id INTEGER PRIMARY KEY,
+                rate TEXT NOT NULL,
+                billing_period TEXT NOT NULL,
+                basic REAL,
+                intermediate REAL,
+                excess REAL,
+                UNIQUE(rate, billing_period),
+                CHECK (billing_period LIKE '____-__')
+            )''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS residential_summer_rates_b(
                 charge_id INTEGER PRIMARY KEY,
                 rate TEXT NOT NULL,
                 billing_period TEXT NOT NULL,
@@ -109,7 +120,8 @@ def populate_tables(conn):
     populate_table_from_csv(conn, "INSERT INTO regions (region_name) VALUES(?)", config.REGIONS_CSV_PATH)
     populate_table_from_csv(conn, "INSERT INTO locations (city, residential_rate, summer_start_month, region_id) VALUES (?, ?, ?, ?)", config.LOCATIONS_CSV_PATH)
     populate_table_from_csv(conn, "INSERT INTO solar_hours (location_id, tilt_angle, month, solar_hours) VALUES (?, ?, ?, ?)", config.SOLAR_HOURS_CSV_PATH)
-    populate_table_from_csv(conn, "INSERT INTO residential_summer_rates (rate, billing_period, basic, low_intermediate, high_intermediate, excess) VALUES(?, ?, ?, ?, ?, ?)", config.RESIDENTIAL_SUMMER_RATES_CSV_PATH)
+    populate_table_from_csv(conn, "INSERT INTO residential_summer_rates_a (rate, billing_period, basic, intermediate, excess) VALUES(?, ?, ?, ?, ?)", config.RESIDENTIAL_SUMMER_RATES_A_CSV_PATH)
+    populate_table_from_csv(conn, "INSERT INTO residential_summer_rates_b (rate, billing_period, basic, low_intermediate, high_intermediate, excess) VALUES(?, ?, ?, ?, ?, ?)", config.RESIDENTIAL_SUMMER_RATES_B_CSV_PATH)
     populate_table_from_csv(conn, "INSERT INTO residential_winter_rates (rate, billing_period, basic, intermediate, excess) VALUES(?, ?, ?, ?, ?)", config.RESIDENTIAL_WINTER_RATES_CSV_PATH)
     populate_table_from_csv(conn, "INSERT INTO commercial_rates (region_id, rate, billing_period, transmission, distribution, cenace, supplier, services, energy, capacity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", config.COMMERCIAL_RATES_CSV_PATH)
     

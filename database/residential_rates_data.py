@@ -43,8 +43,12 @@ class ResidentialRatesData(ResidentialRatesDAO):
 
     def _get_summer_charges(self, rate, summer_months, end_year_month):
         year_months = self._generate_year_months(summer_months, end_year_month)
-        columns = ['billing_period', 'basic', 'low_intermediate', 'high_intermediate', 'excess']
-        return self._retrieve_charges(rate, year_months, 'residential_summer_rates', columns)
+        if rate in ['1A', '1B']:
+            columns = ['billing_period', 'basic', 'intermediate', 'excess']
+            return self._retrieve_charges(rate, year_months, 'residential_summer_rates_a', columns)
+        elif rate in ['1C', '1D', '1E', '1F']:
+            columns = ['billing_period', 'basic', 'low_intermediate', 'high_intermediate', 'excess']
+            return self._retrieve_charges(rate, year_months, 'residential_summer_rates_b', columns)
 
     def _get_winter_charges(self, rate, winter_months, end_year_month):
         year_months = self._generate_year_months(winter_months, end_year_month)
